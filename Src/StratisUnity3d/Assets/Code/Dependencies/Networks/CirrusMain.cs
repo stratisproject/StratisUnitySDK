@@ -5,7 +5,7 @@ using NBitcoin.DataEncoders;
 
 namespace Stratis.Sidechains.Networks
 {
-    public class CirrusMain : Network
+    public class CirrusMain : PoANetwork
     {
         public CirrusMain()
         {
@@ -44,6 +44,7 @@ namespace Stratis.Sidechains.Networks
 
             this.Genesis = genesisBlock;
             
+
             this.Federations = new Federations();
             var straxFederationTransactionSigningKeys = new List<PubKey>()
             {
@@ -66,6 +67,29 @@ namespace Stratis.Sidechains.Networks
 
             // Register the new set of federation members.
             this.Federations.RegisterFederation(new Federation(straxFederationTransactionSigningKeys));
+
+            // The height at which the following list of members apply.
+            this.MultisigMinersApplicabilityHeight = 1413998;
+
+            // Set the list of Strax Era mining keys.
+            this.StraxMiningMultisigMembers = new List<PubKey>()
+            {
+                new PubKey("02ace4fbe6a622cdfc922a447c3253e8635f3fecb69241f73629e6f0596a567907"),
+                new PubKey("028e1d9fd64b84a2ec85fac7185deb2c87cc0dd97270cf2d8adc3aa766dde975a7"),
+                new PubKey("025cb67811d0922ca77fa33f19c3e5c37961f9639a1f0a116011b9075f6796abcb"),
+                new PubKey("027e793fbf4f6d07de15b0aa8355f88759b8bdf92a9ffb8a65a87fa8ee03baeccd"),
+                new PubKey("03eb5db0b1703ea7418f0ad20582bf8de0b4105887d232c7724f43f19f14862488"),
+                new PubKey("03e8809be396745434ee8c875089e518a3eef40e31ade81869ce9cbef63484996d"),
+                new PubKey("0317abe6a28cc7af44a46de97e7c6120c1ccec78afb83efe18030f5c36e3016b32"),
+                new PubKey("038e1a76f0e33474144b61e0796404821a5150c00b05aad8a1cd502c865d8b5b92"),
+                new PubKey("036437789fac0ab74cda93d98b519c28608a48ef86c3bd5e8227af606c1e025f61"),
+                new PubKey("03d8b5580b7ec709c006ef497327db27ea323bd358ca45412171c644214483b74f"),
+                new PubKey("02f40bd4f662ba20629a104115f0ac9ee5eab695716edfe01b240abf56e05797e2"),
+                new PubKey("0323033679aa439a0388f09f2883bf1ca6f50283b41bfeb6be6ddcc4e420144c16"),
+                new PubKey("03535a285d0919a9bd71df3b274cecb46e16b78bf50d3bf8b0a3b41028cf8a842d"),
+                new PubKey("03a37019d2e010b046ef9d0459e4844a015758007602ddfbdc9702534924a23695"),
+                new PubKey("03f5de5176e29e1e7d518ae76c1e020b1da18b57a3713ac81b16015026e232748e"),
+            };
             
             var buriedDeployments = new BuriedDeploymentsArray
             {
@@ -75,41 +99,7 @@ namespace Stratis.Sidechains.Networks
             };
 
             var bip9Deployments = new NoBIP9Deployments();
-
-            this.Consensus = new Consensus(
-                consensusFactory: consensusFactory,
-                consensusOptions: null,
-                coinType: 401,
-                hashGenesisBlock: genesisBlock.GetHash(),
-                subsidyHalvingInterval: 210000,
-                majorityEnforceBlockUpgrade: 750,
-                majorityRejectBlockOutdated: 950,
-                majorityWindow: 1000,
-                buriedDeployments: buriedDeployments,
-                bip9Deployments: bip9Deployments,
-                bip34Hash: new uint256("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8"),
-                minerConfirmationWindow: 2016, // nPowTargetTimespan / nPowTargetSpacing
-                maxReorgLength: 240, // Heuristic. Roughly 2 * mining members
-                defaultAssumeValid: new uint256("0xbfd4a96a6c5250f18bf7c586761256fa5f8753ffa10b24160f0648a452823a95"), // 1400000
-                maxMoney: Money.Coins(100_000_000),
-                coinbaseMaturity: 1,
-                premineHeight: 2,
-                premineReward: Money.Coins(100_000_000),
-                proofOfWorkReward: Money.Coins(0),
-                powTargetTimespan: TimeSpan.FromDays(14), // two weeks
-                targetSpacing: TimeSpan.FromSeconds(16),
-                powAllowMinDifficultyBlocks: false,
-                posNoRetargeting: false,
-                powNoRetargeting: true,
-                powLimit: null,
-                minimumChainWork: null,
-                isProofOfStake: false,
-                lastPowBlock: 0,
-                proofOfStakeLimit: null,
-                proofOfStakeLimitV2: null,
-                proofOfStakeReward: Money.Zero
-            );
-
+            
             // Same as current smart contracts test networks to keep tests working
             this.Base58Prefixes = new byte[12][];
             this.Base58Prefixes[(int)Base58Type.PUBKEY_ADDRESS] = new byte[] { 28 }; // C
@@ -130,11 +120,34 @@ namespace Stratis.Sidechains.Networks
             this.Bech32Encoders[(int)Bech32Type.WITNESS_PUBKEY_ADDRESS] = encoder;
             this.Bech32Encoders[(int)Bech32Type.WITNESS_SCRIPT_ADDRESS] = encoder;
 
-            this.StandardScriptsRegistry = new PoAStandardScriptsRegistry();
-
-            Assert(this.DefaultBanTimeSeconds <= this.Consensus.MaxReorgLength * this.Consensus.TargetSpacing.TotalSeconds / 2);
-            Assert(this.Consensus.HashGenesisBlock == uint256.Parse("000005769503496300ec879afd7543dc9f86d3b3d679950b2b83e2f49f525856"));
-            Assert(this.Genesis.Header.HashMerkleRoot == uint256.Parse("1669a55d45b642af0ce82c5884cf5b8d8efd5bdcb9a450c95f442b9bd1ff65ea"));
+            this.Checkpoints = new Dictionary<int, CheckpointInfo>()
+            {
+                { 50000, new CheckpointInfo(new uint256("0xf3ed37db1c56751fdf9f45902696dd034444a697cd8c106a08f4c60cd2de9d77")) },
+                { 100000, new CheckpointInfo(new uint256("0x1400cb20800d54cd7fff5fea90133a1a8ca44e7043268cd0c7efdd7f8186b2d0")) },
+                { 150000, new CheckpointInfo(new uint256("0x505d22805f0fc4ea057edad778e7334412526a7c1b017b179be5d274c8d42914")) },
+                { 200000, new CheckpointInfo(new uint256("0x5569221c600e42b0467c92bd932046c12198eee5c50ac98eadff7d3159f55b75")) },
+                { 250000, new CheckpointInfo(new uint256("0x1a0d5f43335eff00e8a3b5dc09e4f6849b571b6870eb58364cf86623222922d7")) },
+                { 300000, new CheckpointInfo(new uint256("0x3b1c3704e0cb79e7fff46ab7e9feacbfa9e2e95ab90b273d99520dbd42cc34b6")) },
+                { 350000, new CheckpointInfo(new uint256("0xcb420b8ef20e1da9eb63b6847005b17928b4bad6c2920eebc964ecf21c50ce5a")) },
+                { 400000, new CheckpointInfo(new uint256("0xa501a5c69dfce78e39bf0c25d2c1eafa9fd7a9f32ee06b419d3a3c0a6ac29d8b")) },
+                { 450000, new CheckpointInfo(new uint256("0xc3ae6119d23294ac51c05f9c761da5271711b1945592cb83cc1bcc1b908780c7")) },
+                { 500000, new CheckpointInfo(new uint256("0x810cc011d6d5158aaefcc38550a31b4118fae1bb18ea7894f81a2edc81126d5f")) },
+                { 550000, new CheckpointInfo(new uint256("0x3a6b0a58deb1997879d35fc6e017123594c00eafb3ac45d8c31a5dbf68c2bccc")) },
+                { 600000, new CheckpointInfo(new uint256("0xc79bf7066ec9243a335fcd2a43380a47a5b9dccdeaee3f67ab5503cef0cd1626")) },
+                { 700000, new CheckpointInfo(new uint256("0xe777ae5e283564a994cbcf88315a594854c12d626e6908fb27e3d0cd7d04fcc7")) },
+                { 800000, new CheckpointInfo(new uint256("0xe8b2b9b4e342b0ff9a0b1b967b0f2b7481fe420c5922322d1b77cfae66471fa1")) },
+                { 900000, new CheckpointInfo(new uint256("0x30599fbbce4404ebaff9f8d0ea7071c684f124439f1f4e9fabec0debad6c7a06")) },
+                { 1_000_000, new CheckpointInfo(new uint256("0x547faf99acb45e2195ea5fbb6873562c44a7696f6571e8a309d6c9f509be064a")) },
+                { 1_100_000, new CheckpointInfo(new uint256("0x7abc2882bcb5e9723ba71ff4155ed3c4006ee655e9f52f8787bcae31b4c796a8")) },
+                { 1_200_000, new CheckpointInfo(new uint256("0x8411b830270cc9d6c2e28de1c2e8025c57a5673835f63e30708967adfee5a92c")) },
+                { 1_300_000, new CheckpointInfo(new uint256("0x512c19a8245316b4d3b13513c7901f41842846f539f668ca4ac349daaab6dc20")) },
+                { 1_400_000, new CheckpointInfo(new uint256("0xbfd4a96a6c5250f18bf7c586761256fa5f8753ffa10b24160f0648a452823a95")) },
+                { 1_500_000, new CheckpointInfo(new uint256("0x2a1602877a5231997654bae975223762ee636be2f371cb444b2d3fb564e6989e")) },
+                { 1_750_000, new CheckpointInfo(new uint256("0x58c96a878efeeffea1b1924b61eed627687900e01588ffaa2f4a161973f01abf")) },
+                { 1_850_000, new CheckpointInfo(new uint256("0x6e2590bd9a8eaab25b236c0c9ac314abec70b18aa053b96c9257f2356dec8314")) },
+                { 2_150_000, new CheckpointInfo(new uint256("0x4c65f29b5098479cab275afd77d302ebe5ed8d8ef33e02ae54bf185865763f18")) },
+                { 2_500_000, new CheckpointInfo(new uint256("0x2853be7b7224840d3d4b60427ea832e9bd67d8fc6bfcd4956b8c6b2414cf8fc2")) },
+            };
         }
     }
 
