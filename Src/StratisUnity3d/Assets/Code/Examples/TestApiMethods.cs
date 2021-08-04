@@ -12,7 +12,7 @@ public class TestApiMethods : MonoBehaviour
         // Create network instance. Strax test and main & cirrus test and main are supported. 
         Network network = new StraxMain();
 
-        // API client used to interact with strax node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
+        // API Client used to interact with strax node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
         Unity3dClient client = new Unity3dClient("http://localhost:44336/");
 
         //Mnemonic newMnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);

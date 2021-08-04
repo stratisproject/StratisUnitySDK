@@ -14,8 +14,8 @@ public class TestSmartContracts : MonoBehaviour
         // Cirrus main and test networks support smart contracts.
         Network network = new CirrusMain();
 
-        // API client used to interact with a node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
-        //Unity3dClient client = new Unity3dClient("http://localhost:44336/");
+        // API Client used to interact with a node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
+        //Unity3dClient Client = new Unity3dClient("http://localhost:44336/");
         Unity3dClient client = new Unity3dClient("https://cirrusapi.stratisplatform.com/");
         
         Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);

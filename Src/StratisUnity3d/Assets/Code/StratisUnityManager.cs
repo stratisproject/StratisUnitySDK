@@ -13,7 +13,7 @@ using Network = NBitcoin.Network;
 
 public class StratisUnityManager
 {
-    private Unity3dClient client;
+    public readonly Unity3dClient Client;
 
     private Network network;
 
@@ -38,7 +38,7 @@ public class StratisUnityManager
 
     public StratisUnityManager(Unity3dClient client, Network network, Mnemonic mnemonic)
     {
-        this.client = client;
+        this.Client = client;
         this.network = network;
         this.mnemonic = mnemonic;
 
@@ -52,7 +52,7 @@ public class StratisUnityManager
 
     public async Task<decimal> GetBalanceAsync()
     {
-        long balanceSat = await client.GetAddressBalanceAsync(this.address.ToString()).ConfigureAwait(false);
+        long balanceSat = await Client.GetAddressBalanceAsync(this.address.ToString()).ConfigureAwait(false);
 
         decimal balance = new Money(balanceSat).ToUnit(MoneyUnit.BTC);
 
@@ -84,7 +84,7 @@ public class StratisUnityManager
 
         Debug.Log(string.Format("Created tx {0} to {1}, amount: {2}.", tx.GetHash(), destinationAddress, sendAmount));
 
-        await client.SendTransactionAsync(new SendTransactionRequest() {Hex = tx.ToHex()}).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() {Hex = tx.ToHex()}).ConfigureAwait(false);
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -117,7 +117,7 @@ public class StratisUnityManager
 
         Debug.Log(string.Format("Created OP_RETURN tx {0}, data: {1}.", tx.GetHash(), Encoding.UTF8.GetString(bytes)));
 
-        await client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -125,7 +125,7 @@ public class StratisUnityManager
 
     private async Task<Coin[]> GetCoinsAsync()
     {
-        GetUTXOsResponseModel utxos = await client.GetUTXOsForAddressAsync(this.address.ToString()).ConfigureAwait(false);
+        GetUTXOsResponseModel utxos = await Client.GetUTXOsForAddressAsync(this.address.ToString()).ConfigureAwait(false);
 
         Coin[] coins = utxos.Utxos.Select(x => new Coin(new OutPoint(uint256.Parse(x.Hash), x.N), new TxOut(new Money(x.Satoshis), address))).ToArray();
 
@@ -169,7 +169,7 @@ public class StratisUnityManager
             .SetChange(this.address)
             .BuildTransaction(true);
         
-        await client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -211,7 +211,7 @@ public class StratisUnityManager
             .SetChange(this.address)
             .BuildTransaction(true);
 
-        await client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
 
         Debug.Log("SC call transaction sent. Id: " + tx.GetHash().ToString());
         return tx.GetHash().ToString();
