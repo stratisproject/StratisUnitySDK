@@ -815,6 +815,13 @@ namespace Unity3dApi
                     }
                 }
             }
+            catch (Unity3dApi.ApiException e)
+            {
+                if (e.StatusCode == 204)
+                    return null;
+
+                throw e;
+            }
             finally
             {
                 if (disposeClient_)
