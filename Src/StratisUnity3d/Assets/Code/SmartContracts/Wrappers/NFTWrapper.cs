@@ -277,14 +277,14 @@ public class NFTWrapper
 
     /// <summary>Mints new tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task MintAsync(string addrTo)
+    public async Task<string> MintAsync(string addrTo)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
         };
 
-        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Mint", parameters.ToArray());
+        return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Mint", parameters.ToArray());
     }
 
     /// <summary>Mints new tokens</summary>
