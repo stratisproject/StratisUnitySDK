@@ -8,9 +8,15 @@ using UnityEngine;
 public class NFTWrapper
 {
     /// <summary>Deploys StandartToken contract and returns txid of deployment transaction.</summary>
-    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager)
+    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol, string tokenURIFormat, bool ownerOnlyMinting)
     {
-        List<string> constructorParameter = new List<string>() { };
+        List<string> constructorParameter = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.String}#{name}",
+            $"{(int)MethodParameterDataType.String}#{symbol}",
+            $"{(int)MethodParameterDataType.String}#{tokenURIFormat}",
+            $"{(int)MethodParameterDataType.Bool}#{ownerOnlyMinting}"
+        };
 
         string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
@@ -25,6 +31,57 @@ public class NFTWrapper
     {
         this.stratisUnityManager = stratisUnityManager;
         this.contractAddress = contractAddress;
+    }
+
+    /// <summary>Owner of the contract is responsible to for minting/burning.</summary>
+    public async Task<string> Owner()
+    {
+        var localCallData = new LocalCallContractRequest()
+        {
+            GasPrice = 10000,
+            Amount = "0",
+            GasLimit = 250000,
+            ContractAddress = this.contractAddress,
+            MethodName = "Owner",
+            Sender = stratisUnityManager.GetAddress().ToString(),
+            Parameters = new List<string>() { }
+        };
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        return localCallResult.Return.ToString();
+    }
+
+    /// <summary>Name for non-fungible token contract.</summary>
+    public async Task<string> Name()
+    {
+        var localCallData = new LocalCallContractRequest()
+        {
+            GasPrice = 10000,
+            Amount = "0",
+            GasLimit = 250000,
+            ContractAddress = this.contractAddress,
+            MethodName = "Name",
+            Sender = stratisUnityManager.GetAddress().ToString(),
+            Parameters = new List<string>() { }
+        };
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        return localCallResult.Return.ToString();
+    }
+
+    /// <summary>Symbol for non-fungible token contract.</summary>
+    public async Task<string> Symbol()
+    {
+        var localCallData = new LocalCallContractRequest()
+        {
+            GasPrice = 10000,
+            Amount = "0",
+            GasLimit = 250000,
+            ContractAddress = this.contractAddress,
+            MethodName = "Symbol",
+            Sender = stratisUnityManager.GetAddress().ToString(),
+            Parameters = new List<string>() { }
+        };
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        return localCallResult.Return.ToString();
     }
 
     /// <summary>True if provided interface is supported.</summary>
@@ -118,6 +175,23 @@ public class NFTWrapper
         return bool.Parse(localCallResult.Return.ToString());
     }
     
+    /// <remarks>Local call.</remarks>
+    public async Task<string> TokenURIAsync(ulong tokenId)
+    {
+        var localCallData = new LocalCallContractRequest()
+        {
+            GasPrice = 10000,
+            Amount = "0",
+            GasLimit = 250000,
+            ContractAddress = this.contractAddress,
+            MethodName = "TokenURI",
+            Sender = stratisUnityManager.GetAddress().ToString(),
+            Parameters = new List<string>() { $"{(int)MethodParameterDataType.ULong}#{tokenId}" }
+        };
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        return localCallResult.Return.ToString();
+    }
+
     /// <summary>Transfers the ownership of an NFT from one address to another address. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
     public async Task<string> SafeTransferFromAsync(string addrFrom, string addrTo, ulong tokenId, byte[] data)
@@ -187,5 +261,56 @@ public class NFTWrapper
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SetApprovalForAll", parameters.ToArray());
+    }
+
+    /// <summary>Sets the contract owner who can mint/burn.</summary>
+    /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
+    public async Task TransferOwnershipAsync(string addr)
+    {
+        List<string> parameters = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.Address}#{addr}",
+        };
+
+        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferOwnership", parameters.ToArray());
+    }
+
+    /// <summary>Mints new tokens</summary>
+    /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
+    public async Task MintAsync(string addrTo)
+    {
+        List<string> parameters = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.Address}#{addrTo}",
+        };
+
+        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Mint", parameters.ToArray());
+    }
+
+    /// <summary>Mints new tokens</summary>
+    /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
+    public async Task SafeMintAsync(string addrTo, byte[] data)
+    {
+        var bytesString = BitConverter.ToString(data).Replace("-", "");
+
+        List<string> parameters = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.Address}#{addrTo}",
+            $"{(int)MethodParameterDataType.ByteArray}#{bytesString}",
+        };
+
+        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SafeMint", parameters.ToArray());
+    }
+
+    /// <summary>Burns a tokens</summary>
+    /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
+    public async Task BurnAsync(ulong tokenId)
+    {
+        List<string> parameters = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.ULong}#{tokenId}",
+        };
+
+        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Burn", parameters.ToArray());
     }
 }
