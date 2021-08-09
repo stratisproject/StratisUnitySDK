@@ -34,7 +34,8 @@ public class NFTWrapper
     }
 
     /// <summary>Owner of the contract is responsible to for minting/burning.</summary>
-    public async Task<string> Owner()
+    /// <remarks>Local call.</remarks>
+    public async Task<string> OwnerAsync()
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -51,7 +52,8 @@ public class NFTWrapper
     }
 
     /// <summary>Name for non-fungible token contract.</summary>
-    public async Task<string> Name()
+    /// <remarks>Local call.</remarks>
+    public async Task<string> NameAsync()
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -68,7 +70,8 @@ public class NFTWrapper
     }
 
     /// <summary>Symbol for non-fungible token contract.</summary>
-    public async Task<string> Symbol()
+    /// <remarks>Local call.</remarks>
+    public async Task<string> SymbolAsync()
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -174,7 +177,8 @@ public class NFTWrapper
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
         return bool.Parse(localCallResult.Return.ToString());
     }
-    
+
+    /// <remarks>Local call.</remarks>
     /// <remarks>Local call.</remarks>
     public async Task<string> TokenURIAsync(ulong tokenId)
     {

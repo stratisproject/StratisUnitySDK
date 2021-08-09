@@ -104,13 +104,10 @@ public class SCInteractTest : MonoBehaviour
         ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 
         Assert.IsTrue(balanceAfter == balanceBefore + 1);
+
+        Assert.AreEqual("TestNFT", await nft.NameAsync().ConfigureAwait(false));
+        Assert.AreEqual("TNFT", await nft.SymbolAsync().ConfigureAwait(false));
         
-        
-
-
-
-        // TODO issue NFT and transfer to another address and then back. Burn.
-
         Debug.Log("NFT test successful.");
     }
 
