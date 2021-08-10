@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
+using Stratis.SmartContracts.CLR.Serialization;
 using Unity3dApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
@@ -63,7 +64,7 @@ public class TestSmartContracts : MonoBehaviour
     private async Task DeployDaoContractAsync(StratisUnityManager stratisUnityManager)
     {
         // Deploy DAO contract
-        string constructorParameter = ((int)Stratis.SmartContracts.CLR.Serialization.MethodParameterDataType.UInt).ToString() + "#" + "18900";
+        string constructorParameter = ((int)MethodParameterDataType.UInt) + "#" + "18900";
         string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.DaoContract.ByteCode, new string[] { constructorParameter }, 0).ConfigureAwait(false);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
     }
