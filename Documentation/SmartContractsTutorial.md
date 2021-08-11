@@ -6,6 +6,8 @@ You can also check if smart contract is whitelisted using `/api/Voting/whitelist
 
 
 
+
+
 ### What is required to work with stratis smart contracts
 
 First you need to get a full node and sync it. Full node repository can be found here: https://github.com/stratisproject/StratisBitcoinFullNode
@@ -15,6 +17,8 @@ To run it you can just go to `\src\Stratis.CirrusD` and run `dotnet run -txindex
 
 
 Secondly you need to import StratisUnitySDK. Latest version can be found here: https://github.com/stratisproject/Unity3dIntegration/tree/main/Resources
+
+
 
 
 
@@ -71,13 +75,91 @@ await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TN
 
 
 
+
+
 ### Using smart contracts
 
-TODO:
+There are 2 ways to interact with a smart contract: call and local call. 
 
-general usage
+Calls should be used when you want to change smart contract's state. Local calls are used to get data from smart contract and using them doesn't result in creating an on-chain transaction. 
 
-NFT and ST wrappers
+
+
+Here is an example of making local call: 
+
+```
+var localCallData = new LocalCallContractRequest()
+{
+    GasPrice = 10000,
+    Amount = "0",
+    GasLimit = 250000,
+    ContractAddress = contractAddr,
+    MethodName = "MaxVotingDuration",
+    Sender = stratisUnityManager.GetAddress().ToString(),
+    Parameters = new List<string>()
+};
+
+LocalExecutionResult localCallResult = await client.LocalCallAsync(localCallData).ConfigureAwait(false);
+Debug.Log("MaxVotingDuration: " + localCallResult.Return.ToString());
+```
+
+
+
+Call example: 
+
+```
+// Make an on-chain smart contract call.
+string callId = await stratisUnityManager.SendCallContractTransactionAsync("CNiJEPppjvBf1zAAyjcLD81QbVd8NQ59Bv","WhitelistAddress", new string[] {"9#CPokn4GjJHtM7t2b99pdsbLuGd4RbM7pGL"}).ConfigureAwait(false);
+```
+
+
+
+For more you can check examples in `TestSmartContracts.cs`
+
+
+
+
+
+### Using smart contracts via wrappers
+
+NFT and StandartToken contracts have wrappers to make it easier to interact with them. Wrapper is a class that constructs call parameters and makes a call. 
+
+Here is an example for standart token wrapper that displays information about target standart token: 
+
+```
+string standartTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+StandartTokenWrapper stw = new StandartTokenWrapper(stratisUnityManager, standartTokenAddr);
+
+Debug.Log("Symbol: " + await stw.GetSymbolAsync());
+Debug.Log("Name: " + await stw.GetNameAsync());
+Debug.Log("TotalSupply: " + await stw.GetTotalSupplyAsync());
+Debug.Log("Balance: " + await stw.GetBalanceAsync(firstAddress));
+Debug.Log("Decimals: " + await stw.GetDecimalsAsync());
+```
+
+
+
+Here is an example for NFT that mints new NFT: 
+
+```
+string nftAddr = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
+NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
+
+ulong balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+Debug.Log("NFT balance: " + balanceBefore);
+
+string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
+
+await this.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
+
+ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+
+Assert.IsTrue(balanceAfter == balanceBefore + 1);
+```
+
+
+
+For more you can check examples in  `SCInteractTest.cs`
 
 
 
