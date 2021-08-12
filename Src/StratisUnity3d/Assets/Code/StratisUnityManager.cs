@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -215,5 +216,19 @@ public class StratisUnityManager
 
         Debug.Log("SC call transaction sent. Id: " + tx.GetHash().ToString());
         return tx.GetHash().ToString();
+    }
+
+    public async Task<ReceiptResponse> WaitTillReceiptAvailable(string txId)
+    {
+        while (true)
+        {
+            ReceiptResponse result = await this.Client.ReceiptAsync(txId).ConfigureAwait(false);
+
+            if (result != null)
+                return result;
+
+            Debug.Log("Waiting for receipt...");
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
     }
 }

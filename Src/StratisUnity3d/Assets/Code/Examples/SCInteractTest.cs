@@ -67,7 +67,7 @@ public class SCInteractTest : MonoBehaviour
         // Transfer 1 to 2nd address.
         var txId = await stw.TransferToAsync(secondAddress, 1);
 
-        var receipt = await this.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        var receipt = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
 
         Assert.IsTrue(bool.Parse(receipt.ReturnValue));
 
@@ -87,9 +87,9 @@ public class SCInteractTest : MonoBehaviour
 
         // Contract deployment:
         //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", "TestNFT_{0}", false).ConfigureAwait(false);
-        //ReceiptResponse res = await this.WaitTillReceiptAvailable(deplId).ConfigureAwait(false);
+        //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId).ConfigureAwait(false);
         //Debug.Log(res.NewContractAddress);
-        
+
         Debug.Log("Testing NFT.");
         string nftAddr = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
@@ -99,7 +99,7 @@ public class SCInteractTest : MonoBehaviour
 
         string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
 
-        await this.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
         
         ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 
@@ -109,19 +109,5 @@ public class SCInteractTest : MonoBehaviour
         Assert.AreEqual("TNFT", await nft.SymbolAsync().ConfigureAwait(false));
         
         Debug.Log("NFT test successful.");
-    }
-
-    private async Task<ReceiptResponse> WaitTillReceiptAvailable(string txId)
-    {
-        while (true)
-        {
-            ReceiptResponse result = await stratisUnityManager.Client.ReceiptAsync(txId).ConfigureAwait(false);
-
-            if (result != null)
-                return result;
-
-            Debug.Log("Waiting for receipt...");
-            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-        }
     }
 }
