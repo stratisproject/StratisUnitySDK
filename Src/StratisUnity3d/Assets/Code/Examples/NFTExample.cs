@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
@@ -40,6 +42,17 @@ public class NFTExample : MonoBehaviour
         ulong balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
 
         Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
+        
+        // Now let's get token ID
+        List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(nftAddress, null, null, 2300000, null).ConfigureAwait(false)).ToList();
+
+        foreach (ReceiptResponse receiptRes in receipts)
+        {
+            var log = receiptRes.Logs.First().Log;
+            Debug.Log(log.ToString());
+        }
+
+        return;
 
         ulong tokenId = 12345;
         string txId = await nft.TransferFromAsync("tD5aDZSu4Go4A23R7VsjuJTL51YMyeoLyS", "tP2r8anKBWczcBR89yv7rQ1rsSZA2BANhd", tokenId);
