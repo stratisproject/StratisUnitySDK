@@ -46,11 +46,19 @@ To deploy a smart contract you need to use `stratisUnityManager.SendCreateContra
 
 
 
-For example here is how to deploy DAO contract: 
+For example here is how to deploy StandardToken contract: 
 
 ```
-string constructorParameter = ((int)MethodParameterDataType.UInt) + "#" + "18900";
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.DaoContract.ByteCode, new string[] { constructorParameter }, 0).ConfigureAwait(false);
+        List<string> constructorParameter = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.ULong}#1000000",
+            $"{(int)MethodParameterDataType.String}#TestToken",
+            $"{(int)MethodParameterDataType.String}#TT",
+            $"{(int)MethodParameterDataType.UInt}#8"
+        };
+
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
+        Debug.Log("Contract deployment tx sent. TxId: " + txId);
 ```
 
 
