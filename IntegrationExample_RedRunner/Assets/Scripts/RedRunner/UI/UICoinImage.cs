@@ -21,7 +21,7 @@ namespace RedRunner.UI
 
         protected override void Start()
         {
-            GameManager.Singleton.m_Coin.AddEventAndFire(Coin_OnCoinCollected, this);
+            GameManager.Singleton?.m_Coin?.AddEventAndFire(Coin_OnCoinCollected, this);
         }
 
         void Coin_OnCoinCollected (int coinValue)

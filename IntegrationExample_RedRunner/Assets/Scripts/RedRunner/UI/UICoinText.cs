@@ -19,7 +19,7 @@ namespace RedRunner.UI
 
         protected override void Start()
         {
-            GameManager.Singleton.m_Coin.AddEventAndFire(UpdateCoinsText, this);
+            GameManager.Singleton?.m_Coin?.AddEventAndFire(UpdateCoinsText, this);
         }
 
         private void UpdateCoinsText(int newCoinValue)
