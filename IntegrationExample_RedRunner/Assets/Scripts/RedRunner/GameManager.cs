@@ -148,6 +148,8 @@ namespace RedRunner
             if (m_Score > m_HighScore)
             {
                 m_HighScore = m_Score;
+
+                SDKIntegrationManager.Instance.HighScoreSet((int)Math.Round(m_HighScore));
             }
             if (OnScoreChanged != null)
             {

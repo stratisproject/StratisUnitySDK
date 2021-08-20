@@ -21,7 +21,5 @@ namespace RedRunner.UI
 		{
 			text = highScore.ToLength ();
 		}
-
-	}
-
+    }
 }
