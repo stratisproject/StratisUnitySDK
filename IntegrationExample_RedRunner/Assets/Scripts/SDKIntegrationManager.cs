@@ -13,6 +13,11 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public void CoinCollected(int newCoinValue)
     {
+        //Get CRS20 token rewards after
+        //Getting 20\50\150\500 coins or
+        //after setting highest score of
+        //20 / 40 / 70 / 100 / 200m!
+
         // TODO check if equals to X value
         Debug.Log("New coin value" + newCoinValue);
     }
