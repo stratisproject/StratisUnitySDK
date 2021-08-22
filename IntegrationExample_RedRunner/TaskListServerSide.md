@@ -12,5 +12,13 @@ You need to deploy new SRC20 token and new NFT. Server's wallet should own all s
 
 
 
+Server should store information about the user's progress and validate user's input (if user already received reward for getting 50 coins he can't receive that reward again). 
+
+
+
+Addition endpoint with users statistics should be added- just show how many users played the game, how many users got how many rewards. 
+
+
+
 Deploy this modified node on the server that Iain will provide and open port for unity API. 
 
