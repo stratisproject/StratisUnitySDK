@@ -40,7 +40,7 @@ public class SDKIntegrationManager : MonoBehaviour
         //after setting highest score of
         //20 / 40 / 70 / 100 / 200m!
 
-        // TODO check if equals to X value
+        // TODO check if newCoinValue equals to 20\50\150\500 and send info to the server
         Debug.Log("New coin value" + newCoinValue);
     }
 
