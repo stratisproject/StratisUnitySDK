@@ -269,14 +269,14 @@ public class NFTWrapper
 
     /// <summary>Sets the contract owner who can mint/burn.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task TransferOwnershipAsync(string addr)
+    public async Task<string> TransferOwnershipAsync(string addr)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addr}",
         };
 
-        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferOwnership", parameters.ToArray());
+        return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferOwnership", parameters.ToArray());
     }
 
     /// <summary>Mints new tokens</summary>
@@ -293,7 +293,7 @@ public class NFTWrapper
 
     /// <summary>Mints new tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task SafeMintAsync(string addrTo, byte[] data)
+    public async Task<string> SafeMintAsync(string addrTo, byte[] data)
     {
         var bytesString = BitConverter.ToString(data).Replace("-", "");
 
@@ -303,18 +303,18 @@ public class NFTWrapper
             $"{(int)MethodParameterDataType.ByteArray}#{bytesString}",
         };
 
-        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SafeMint", parameters.ToArray());
+        return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SafeMint", parameters.ToArray());
     }
 
     /// <summary>Burns a tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task BurnAsync(ulong tokenId)
+    public async Task<string> BurnAsync(ulong tokenId)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.ULong}#{tokenId}",
         };
 
-        await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Burn", parameters.ToArray());
+        return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Burn", parameters.ToArray());
     }
 }
