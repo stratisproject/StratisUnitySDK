@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Stratis.SmartContracts.CLR.Serialization;
 using Unity3dApi;
 using UnityEngine;
@@ -317,4 +318,19 @@ public class NFTWrapper
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Burn", parameters.ToArray());
     }
+}
+
+public partial class TransferLogEvent
+{
+    [JsonProperty("event")]
+    public string Event { get; set; }
+
+    [JsonProperty("from")]
+    public string From { get; set; }
+
+    [JsonProperty("to")]
+    public string To { get; set; }
+
+    [JsonProperty("tokenId")]
+    public long TokenId { get; set; }
 }
