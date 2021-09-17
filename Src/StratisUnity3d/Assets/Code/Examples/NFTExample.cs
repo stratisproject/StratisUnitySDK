@@ -1,12 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using NBitcoin;
+using Newtonsoft.Json;
 using Stratis.Sidechains.Networks;
 using Unity3dApi;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Network = NBitcoin.Network;
 
 public class NFTExample : MonoBehaviour
@@ -23,9 +23,11 @@ public class NFTExample : MonoBehaviour
 
     private Network network = new CirrusTest();
 
+    private Unity3dClient client;
+
     async void Start()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl);
+        client = new Unity3dClient(ApiUrl);
 
         Mnemonic mnemonic = new Mnemonic(firstAddrMnemonic, Wordlist.English);
         stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
@@ -35,34 +37,30 @@ public class NFTExample : MonoBehaviour
         Debug.Log("FirstAddr: " + firstAddress);
         Debug.Log("SecondAddr: " + secondAddress);
 
-        string nftAddress = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
+        string nftAddress = "tCqDXxUn41fi888aYH7yZGDgBn2N4uK24F";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddress);
 
         ulong balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
         ulong balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
 
+        // Mint NFT
+        string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
         Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
-        
-        // Now let's get token ID
-        List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(nftAddress, null, null, 2300000, null).ConfigureAwait(false)).ToList();
 
-        foreach (ReceiptResponse receiptRes in receipts)
-        {
-            var log = receiptRes.Logs.First().Log;
-            Debug.Log(log.ToString());
-        }
+        string transferId = await nft.TransferFromAsync(firstAddress, secondAddress, 1);
+        ReceiptResponse transferReceipt = await this.stratisUnityManager.WaitTillReceiptAvailable(transferId).ConfigureAwait(false);
+        Debug.Log("NFT transfer: Success: " + transferReceipt.Success + "   returned: " + transferReceipt.ReturnValue + "  transferID: " + transferId);
 
-        return;
+        balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
+        Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
 
-        ulong tokenId = 12345;
-        string txId = await nft.TransferFromAsync("tD5aDZSu4Go4A23R7VsjuJTL51YMyeoLyS", "tP2r8anKBWczcBR89yv7rQ1rsSZA2BANhd", tokenId);
-
-        ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable(txId);
-
-        Debug.Log("Success: " + receipt.Success + "   returned: " + receipt.ReturnValue);
+        // Display all transfers
+        await this.DisplayTransfersAsync(nftAddress);
     }
 
-    private async void DeployNFT()
+    private async Task DeployNFTAsync()
     {
         string nftName = "gameSword";
         string nftSymbol = "GS";
@@ -72,5 +70,23 @@ public class NFTExample : MonoBehaviour
         ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
 
         Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
+    }
+
+    private async Task DisplayTransfersAsync(string nftAddress)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("[NFT transfers]");
+
+        List<ReceiptResponse> transferReceipts = (await client.ReceiptSearchAsync(nftAddress, "TransferLog", null, 2300000, null).ConfigureAwait(false)).ToList();
+        
+        foreach (ReceiptResponse receiptRes in transferReceipts)
+        {
+            string log = receiptRes.Logs.First().Log.ToString();
+            TransferLogEvent transferEvent = JsonConvert.DeserializeObject<TransferLogEvent>(log);
+
+            sb.AppendLine($"From: {transferEvent.From}, To: {transferEvent.To}, TokenId: {transferEvent.TokenId}");
+        }
+
+        Debug.Log(sb.ToString());
     }
 }
