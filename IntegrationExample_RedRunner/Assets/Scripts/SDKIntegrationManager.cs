@@ -10,6 +10,8 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public string Mnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
+    public string RedRunnerTokenContractAddress = "t778saxw6Xdgs77Z5ePpaFPCZ9bk4oNrPT";
+
     public static SDKIntegrationManager Instance { get; private set; }
 
     private Network network = new CirrusTest();
@@ -31,6 +33,15 @@ public class SDKIntegrationManager : MonoBehaviour
 
         decimal balance = await stratisUnityManager.GetBalanceAsync();
         Debug.Log("Your balance: " + balance);
+
+        StandartTokenWrapper token = new StandartTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
+
+        //token.GetBalanceAsync()
+        // TODO
+
+        string name = await token.GetNameAsync();
+
+        Debug.Log("NAME: " + name);
     }
 
     public void CoinCollected(int newCoinValue)

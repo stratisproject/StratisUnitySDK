@@ -211,7 +211,6 @@ public class StratisUnityManager
             .SendFees(totalFee)
             .SetChange(this.address)
             .BuildTransaction(true);
-
         await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
 
         Debug.Log("SC call transaction sent. Id: " + tx.GetHash().ToString());
