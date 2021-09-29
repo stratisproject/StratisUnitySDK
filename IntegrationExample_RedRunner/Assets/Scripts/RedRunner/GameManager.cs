@@ -145,12 +145,15 @@ namespace RedRunner
         IEnumerator DeathCrt()
         {
             m_LastScore = m_Score;
+            bool highestScore = false;
             if (m_Score > m_HighScore)
             {
                 m_HighScore = m_Score;
-
-                SDKIntegrationManager.Instance.HighScoreSet((int)Math.Round(m_HighScore));
+                highestScore = true;
             }
+            
+            SDKIntegrationManager.Instance.PlayerDied((int)Math.Round(m_Score/10), highestScore);
+
             if (OnScoreChanged != null)
             {
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);

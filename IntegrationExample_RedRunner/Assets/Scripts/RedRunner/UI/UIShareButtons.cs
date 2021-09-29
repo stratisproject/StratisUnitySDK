@@ -15,6 +15,11 @@ namespace RedRunner.UI
 		protected Animator[] m_ShareButtons;
 		protected bool m_IsOpen = false;
 
+        void Awake()
+        {
+            SetTrigger("Close");
+		}
+
 		void Start ()
 		{
 			

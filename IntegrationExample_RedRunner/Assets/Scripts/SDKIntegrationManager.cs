@@ -1,11 +1,18 @@
+using System.Threading.Tasks;
 using NBitcoin;
+using RedRunner;
 using Stratis.Sidechains.Networks;
 using Unity3dApi;
 using UnityEngine;
+using UnityEngine.UI;
 using Network = NBitcoin.Network;
 
 public class SDKIntegrationManager : MonoBehaviour
 {
+    public InputField Mnemonic_InputField, DestAddrInputField, AmountInputField;
+
+    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton;
+
     public string ApiUrl = "http://localhost:44336/";
 
     public string Mnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
@@ -20,11 +27,13 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private string address;
 
+    private Unity3dClient client;
+
     async void Start()
     {
         Instance = this;
 
-        Unity3dClient client = new Unity3dClient(ApiUrl);
+        client = new Unity3dClient(ApiUrl);
 
         Mnemonic mnemonic = new Mnemonic(Mnemonic, Wordlist.English);
         stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
@@ -36,27 +45,35 @@ public class SDKIntegrationManager : MonoBehaviour
 
         StandartTokenWrapper token = new StandartTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
 
-        //token.GetBalanceAsync()
+        var balanceToken = await token.GetBalanceAsync(address);
+        var ownerBalanceToken = await token.GetBalanceAsync("t7SjCNX2yJUHNTVHk6M6N6usDG6uT7XfzB");
+
+        Debug.Log("TokenBalance_ ME: " + balanceToken + "       Game Owner: " + ownerBalanceToken);
+
+        this.InitializeUI();
+    }
+
+    private void InitializeUI()
+    {
         // TODO
-
-        string name = await token.GetNameAsync();
-
-        Debug.Log("NAME: " + name);
     }
-
-    public void CoinCollected(int newCoinValue)
+    
+    public void PlayerDied(int distance, bool isHighestScore)
     {
-        //Get CRS20 token rewards after
-        //Getting 20\50\150\500 coins or
-        //after setting highest score of
-        //20 / 40 / 70 / 100 / 200m!
+        Debug.Log("PLAYER DEATH. coins collected = " + GameManager.Singleton.m_Coin.Value + "    distanceRan = " + distance);
 
-        // TODO check if newCoinValue equals to 20\50\150\500 and send info to the server
-        Debug.Log("New coin value" + newCoinValue);
-    }
+        Task.Run(async () =>
+        {
+            var coinsCollected = GameManager.Singleton.m_Coin.Value;
 
-    public void HighScoreSet(int newHighScore)
-    {
-        Debug.Log("New high score" + newHighScore);
+            if (isHighestScore)
+                Debug.Log("New high distance" + distance);
+
+
+            PlayerNotificationResult result =
+                await client.PlayerAchievementsNotificationAsync(address, "NO_NAME", coinsCollected, distance);
+
+            Debug.Log("SEND TOKENS ON DEATH: " + result.SendTokens);
+        });
     }
 }
