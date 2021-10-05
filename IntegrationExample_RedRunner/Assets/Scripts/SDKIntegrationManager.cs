@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
 using RedRunner;
@@ -11,7 +14,9 @@ public class SDKIntegrationManager : MonoBehaviour
 {
     public InputField Mnemonic_InputField, DestAddrInputField, AmountInputField;
 
-    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton;
+    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton, Button_CopyAddr;
+
+    public Text AddressText, BalanceStraxText, BalanceRRTText;
 
     public string ApiUrl = "http://localhost:44336/";
 
@@ -29,35 +34,93 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private Unity3dClient client;
 
-    async void Start()
+    private StandartTokenWrapper tokenRRT;
+
+    void Awake()
     {
         Instance = this;
-
         client = new Unity3dClient(ApiUrl);
+        this.InitializeUI();
 
-        Mnemonic mnemonic = new Mnemonic(Mnemonic, Wordlist.English);
-        stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+        InitMnemonic(Mnemonic);
+    }
+
+    private void InitMnemonic(string mnemonic)
+    {
+        Mnemonic m = new Mnemonic(mnemonic, Wordlist.English);
+        stratisUnityManager = new StratisUnityManager(client, network, m);
+        this.tokenRRT = new StandartTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
         address = stratisUnityManager.GetAddress().ToString();
         Debug.Log("Your address: " + address);
+        
+        this.Mnemonic_InputField.text = mnemonic;
+        this.AddressText.text = address;
 
-        decimal balance = await stratisUnityManager.GetBalanceAsync();
-        Debug.Log("Your balance: " + balance);
-
-        StandartTokenWrapper token = new StandartTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
-
-        var balanceToken = await token.GetBalanceAsync(address);
-        var ownerBalanceToken = await token.GetBalanceAsync("t7SjCNX2yJUHNTVHk6M6N6usDG6uT7XfzB");
-
-        Debug.Log("TokenBalance_ ME: " + balanceToken + "       Game Owner: " + ownerBalanceToken);
-
-        this.InitializeUI();
+        this.StartCoroutine(RefreshBalance());
     }
 
+    private IEnumerator RefreshBalance()
+    {
+        decimal straxBalance = -1;
+        ulong rrtBalance = 0;
+
+        Task task = Task.Run(async () =>
+        {
+            try
+            {
+                straxBalance = await stratisUnityManager.GetBalanceAsync();
+                rrtBalance = await tokenRRT.GetBalanceAsync(address);
+
+                Debug.Log("STRAXBalance: " + straxBalance + " | TokenBalance: " + rrtBalance);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
+        });
+
+        while (!task.IsCompleted)
+            yield return null;
+
+
+        SynchronizationContext.Current.Post(state =>
+        {
+            this.BalanceRRTText.text = "RRT: " + rrtBalance;
+            this.BalanceStraxText.text = "tSTRAX: " + straxBalance;
+        }, null);
+    }
+
+    #region UI
     private void InitializeUI()
     {
-        // TODO
+        this.Button_NewMnmemonic.onClick.AddListener(NewMnemonic_bnCall);
+        this.Button_SetMnmemonic.onClick.AddListener(SetMnemonic_bnCall);
+
+        Button_CopyAddr.onClick.AddListener(CopyAddress_ButtonCall);
+        RefreshButton.onClick.AddListener(() => this.StartCoroutine(RefreshBalance()));
+
+        // TODO send trax and RRT UI left
     }
-    
+
+    private void CopyAddress_ButtonCall()
+    {
+        GUIUtility.systemCopyBuffer = this.address;
+    }
+
+    private void SetMnemonic_bnCall()
+    {
+        InitMnemonic(this.Mnemonic_InputField.text);
+    }
+
+    private void NewMnemonic_bnCall()
+    {
+        Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
+        this.Mnemonic_InputField.text = mnemonic.ToString();
+
+        SetMnemonic_bnCall();
+    }
+    #endregion
+
     public void PlayerDied(int distance, bool isHighestScore)
     {
         Debug.Log("PLAYER DEATH. coins collected = " + GameManager.Singleton.m_Coin.Value + "    distanceRan = " + distance);
