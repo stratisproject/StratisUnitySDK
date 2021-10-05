@@ -18,6 +18,12 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public Text AddressText, BalanceStraxText, BalanceRRTText;
 
+    public GameObject PopupPanel;
+
+    public Text PopupPanel_Text;
+
+    public Button PopupPanelOk_Button;
+
     public string ApiUrl = "http://localhost:44336/";
 
     public string Mnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
@@ -90,36 +96,81 @@ public class SDKIntegrationManager : MonoBehaviour
         }, null);
     }
 
-    #region UI
-    private void InitializeUI()
+    private IEnumerator SendStrax_ButtonCall()
     {
-        this.Button_NewMnmemonic.onClick.AddListener(NewMnemonic_bnCall);
-        this.Button_SetMnmemonic.onClick.AddListener(SetMnemonic_bnCall);
+        string destAddress = this.DestAddrInputField.text;
+        Money amount = new Money(Decimal.Parse(this.AmountInputField.text), MoneyUnit.BTC);
 
-        Button_CopyAddr.onClick.AddListener(CopyAddress_ButtonCall);
-        RefreshButton.onClick.AddListener(() => this.StartCoroutine(RefreshBalance()));
+        string txHash = null;
+        string error = null;
 
-        // TODO send trax and RRT UI left
+        Task task = Task.Run(async () =>
+        {
+            try
+            {
+                txHash = await this.stratisUnityManager.SendTransactionAsync(destAddress, amount);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.ToString());
+                error = e.ToString();
+                return;
+            }
+        });
+
+        while (!task.IsCompleted)
+            yield return null;
+
+        if (error != null)
+        {
+            this.DisplayPopup("Error sending tx: " + error);
+        }
+        else
+        {
+            this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} STRAX was sent.", txHash, destAddress, amount));
+        }
+
+        this.DestAddrInputField.text = "";
+        this.AmountInputField.text = "";
     }
 
-    private void CopyAddress_ButtonCall()
+    private IEnumerator SendRRT_ButtonCall()
     {
-        GUIUtility.systemCopyBuffer = this.address;
-    }
+        string destAddress = this.DestAddrInputField.text;
+        ulong amount = ulong.Parse(this.AmountInputField.text);
 
-    private void SetMnemonic_bnCall()
-    {
-        InitMnemonic(this.Mnemonic_InputField.text);
-    }
+        string txHash = null;
+        string error = null;
 
-    private void NewMnemonic_bnCall()
-    {
-        Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
-        this.Mnemonic_InputField.text = mnemonic.ToString();
+        Task task = Task.Run(async () =>
+        {
+            try
+            {
+                txHash = await this.tokenRRT.TransferToAsync(destAddress, amount);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.ToString());
+                error = e.ToString();
+                return;
+            }
+        });
 
-        SetMnemonic_bnCall();
+        while (!task.IsCompleted)
+            yield return null;
+
+        if (error != null)
+        {
+            this.DisplayPopup("Error sending tx: " + error);
+        }
+        else
+        {
+            this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} RRT was sent.", txHash, destAddress, amount));
+        }
+
+        this.DestAddrInputField.text = "";
+        this.AmountInputField.text = "";
     }
-    #endregion
 
     public void PlayerDied(int distance, bool isHighestScore)
     {
@@ -139,4 +190,48 @@ public class SDKIntegrationManager : MonoBehaviour
             Debug.Log("SEND TOKENS ON DEATH: " + result.SendTokens);
         });
     }
+
+    #region UI
+    private void InitializeUI()
+    {
+        this.PopupPanel.SetActive(false);
+        this.Button_NewMnmemonic.onClick.AddListener(NewMnemonic_bnCall);
+        this.Button_SetMnmemonic.onClick.AddListener(SetMnemonic_bnCall);
+
+        Button_CopyAddr.onClick.AddListener(CopyAddress_ButtonCall);
+        RefreshButton.onClick.AddListener(() => this.StartCoroutine(RefreshBalance()));
+
+        SendStraxButton.onClick.AddListener(() => this.StartCoroutine(SendStrax_ButtonCall()));
+        SendRRTButton.onClick.AddListener(() => this.StartCoroutine(SendRRT_ButtonCall()));
+
+        PopupPanelOk_Button.onClick.AddListener(() => this.PopupPanel.SetActive(false));
+    }
+
+    private void CopyAddress_ButtonCall()
+    {
+        GUIUtility.systemCopyBuffer = this.address;
+    }
+
+    private void SetMnemonic_bnCall()
+    {
+        InitMnemonic(this.Mnemonic_InputField.text);
+    }
+
+    private void NewMnemonic_bnCall()
+    {
+        Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
+        this.Mnemonic_InputField.text = mnemonic.ToString();
+
+        SetMnemonic_bnCall();
+    }
+
+    private void DisplayPopup(string text)
+    {
+        SynchronizationContext.Current.Post(state =>
+        {
+            this.PopupPanel.SetActive(true);
+            this.PopupPanel_Text.text = text;
+        }, null);
+    }
+    #endregion
 }
