@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
+using Newtonsoft.Json;
 using RedRunner;
 using Stratis.Sidechains.Networks;
 using Unity3dApi;
@@ -30,7 +33,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public string RedRunnerTokenContractAddress = "t778saxw6Xdgs77Z5ePpaFPCZ9bk4oNrPT";
 
-    public string RedRunnerNFTContractAddress = "tA9k1WMEtanRrY3k4oudiswZr4Z3bXkNNn";
+    public string RedRunnerNFTContractAddress = "tPsCN2Wmu8ER1Bq1vufb6gVKrHQrUC5gu5";
 
     public static SDKIntegrationManager Instance { get; private set; }
 
@@ -59,6 +62,11 @@ public class SDKIntegrationManager : MonoBehaviour
         this.InitializeUI();
 
         InitMnemonic(Mnemonic);
+
+
+        // TODO
+        var res = await stratisUnityManager.Client.ReceiptAsync("34229aa18686e1cc2fb73c4c6cef1cbad8288e9a46b65d7195d89d5c4a9c2eb9");
+        Debug.Log("Success: " + res.Success + " " + res.Error);
     }
 
     private void InitMnemonic(string mnemonic)
@@ -140,6 +148,7 @@ public class SDKIntegrationManager : MonoBehaviour
         SendStraxButton.onClick.AddListener(() => this.StartCoroutine(SendStrax_ButtonCall()));
         SendRRTButton.onClick.AddListener(() => this.StartCoroutine(SendRRT_ButtonCall()));
         Button_MintNFT.onClick.AddListener(() => this.StartCoroutine(MintNFT_ButtonCall()));
+        Button_SendNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall()));
 
         PopupPanelOk_Button.onClick.AddListener(() => this.PopupPanel.SetActive(false));
     }
@@ -300,5 +309,92 @@ public class SDKIntegrationManager : MonoBehaviour
         }
     }
 
+    private IEnumerator SendNFT_ButtonCall()
+    {
+        ulong amount = ulong.Parse(this.AmountInputField.text);
+        string destAddress = this.DestAddrInputField.text;
+
+        if (NFTBalance <= 0)
+        {
+            this.DisplayPopup("You dont have any NFTs!");
+        }
+        else if (amount != 1)
+        {
+            this.DisplayPopup("Only 1 NFT can be sent at a time.");
+        }
+        else
+        {
+            string txHash = null;
+            string error = null;
+
+            this.DisplayPopup("Sending NFT transaction. Wait...");
+
+            Task task = Task.Run(async () =>
+            {
+                try
+                {
+                    List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(RedRunnerNFTContractAddress, "TransferLog", null, NFTContractLogsStartHeight, null).ConfigureAwait(false)).ToList();
+
+                    List<TransferInfo> transferLogs = new List<TransferInfo>(receipts.Count);
+
+                    foreach (ReceiptResponse receiptRes in receipts)
+                    {
+                        var log = receiptRes.Logs.First().Log.ToString();
+                        TransferInfo infoObj = JsonConvert.DeserializeObject<TransferInfo>(log);
+                        transferLogs.Add(infoObj);
+                    }
+
+                    transferLogs.Reverse();
+                    
+                    long selectedId = -1;
+
+                    for (int i = 0; i < transferLogs.Count; i++)
+                    {
+                        if (transferLogs[i].To == address)
+                        {
+                            // Check if it was used already.
+                            long id = transferLogs[i].Value;
+
+                            var logsAfter = transferLogs.GetRange(0, i);
+
+                            bool usedAlready = logsAfter.Any(x => x.Value == id && x.From == address);
+
+                            if (usedAlready)
+                                continue;
+
+                            selectedId = transferLogs[i].Value;
+                            break;
+                        }
+                    }
+
+                    if (selectedId == -1)
+                        throw new Exception("No NFT ID found");
+                    
+                    Debug.Log(string.Format("Sending NFT from {0} to {1}, NFT ID: {2}", address, destAddress, selectedId));
+
+                    await this.nft.TransferFromAsync(address, destAddress, (ulong)selectedId);
+
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                    error = e.ToString();
+                    return;
+                }
+            });
+
+            while (!task.IsCompleted)
+                yield return null;
+
+            if (error != null)
+            {
+                this.DisplayPopup("Error sending NFT: " + error);
+            }
+            else
+            {
+                this.DisplayPopup(string.Format("NFT transaction {0} to {1} was sent.", txHash, destAddress));
+            }
+        }
+    }
     #endregion
 }
