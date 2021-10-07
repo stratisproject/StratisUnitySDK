@@ -33,7 +33,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public string RedRunnerTokenContractAddress = "t778saxw6Xdgs77Z5ePpaFPCZ9bk4oNrPT";
 
-    public string RedRunnerNFTContractAddress = "tPsCN2Wmu8ER1Bq1vufb6gVKrHQrUC5gu5";
+    public string RedRunnerNFTContractAddress = "tPsCN2Wmu8ER1Bq1vufb6gVKrHQrUC5gu5"; 
 
     public static SDKIntegrationManager Instance { get; private set; }
 
@@ -64,9 +64,21 @@ public class SDKIntegrationManager : MonoBehaviour
         InitMnemonic(Mnemonic);
 
 
+        //var q = await NFTWrapper.DeployNFTContractAsync(stratisUnityManager, "RedRunnerNFT1", "RRNFT", "RRNFT_{0}", false);
+        //var res1 = await stratisUnityManager.WaitTillReceiptAvailable(q);
+        //Debug.Log("CONTRACT ADDR " + res1.NewContractAddress);
+
+        //var OWNER = await nft.OwnerOfAsync(2);
+        //Debug.Log("Owner: " + OWNER);
+
+
+        //var id = await nft.MintAsync(address);
+        //var mintRes = await stratisUnityManager.WaitTillReceiptAvailable(q);
+
+
         // TODO
-        var res = await stratisUnityManager.Client.ReceiptAsync("34229aa18686e1cc2fb73c4c6cef1cbad8288e9a46b65d7195d89d5c4a9c2eb9");
-        Debug.Log("Success: " + res.Success + " " + res.Error);
+        //var res = await stratisUnityManager.Client.ReceiptAsync("34229aa18686e1cc2fb73c4c6cef1cbad8288e9a46b65d7195d89d5c4a9c2eb9");
+        //Debug.Log("Success: " + res.Success + " " + res.Error);
     }
 
     private void InitMnemonic(string mnemonic)
@@ -340,6 +352,8 @@ public class SDKIntegrationManager : MonoBehaviour
                     foreach (ReceiptResponse receiptRes in receipts)
                     {
                         var log = receiptRes.Logs.First().Log.ToString();
+
+                        Debug.Log(log); // TODO
                         TransferInfo infoObj = JsonConvert.DeserializeObject<TransferInfo>(log);
                         transferLogs.Add(infoObj);
                     }
@@ -353,16 +367,16 @@ public class SDKIntegrationManager : MonoBehaviour
                         if (transferLogs[i].To == address)
                         {
                             // Check if it was used already.
-                            long id = transferLogs[i].Value;
+                            long id = transferLogs[i].TokenId;
 
                             var logsAfter = transferLogs.GetRange(0, i);
 
-                            bool usedAlready = logsAfter.Any(x => x.Value == id && x.From == address);
+                            bool usedAlready = logsAfter.Any(x => x.TokenId == id && x.From == address);
 
                             if (usedAlready)
                                 continue;
 
-                            selectedId = transferLogs[i].Value;
+                            selectedId = transferLogs[i].TokenId;
                             break;
                         }
                     }
