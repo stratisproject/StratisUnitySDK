@@ -14,9 +14,9 @@ public class SDKIntegrationManager : MonoBehaviour
 {
     public InputField Mnemonic_InputField, DestAddrInputField, AmountInputField;
 
-    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton, Button_CopyAddr;
+    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton, Button_CopyAddr, Button_SendNFT, Button_MintNFT;
 
-    public Text AddressText, BalanceStraxText, BalanceRRTText;
+    public Text AddressText, BalanceStraxText, BalanceRRTText, NFTBalanceText;
 
     public GameObject PopupPanel;
 
@@ -41,6 +41,9 @@ public class SDKIntegrationManager : MonoBehaviour
     private Unity3dClient client;
 
     private StandartTokenWrapper tokenRRT;
+
+    private decimal straxBalance = -1;
+    private ulong rrtBalance = 0;
 
     void Awake()
     {
@@ -67,9 +70,6 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private IEnumerator RefreshBalance()
     {
-        decimal straxBalance = -1;
-        ulong rrtBalance = 0;
-
         Task task = Task.Run(async () =>
         {
             try
@@ -92,7 +92,7 @@ public class SDKIntegrationManager : MonoBehaviour
         SynchronizationContext.Current.Post(state =>
         {
             this.BalanceRRTText.text = "RRT: " + rrtBalance;
-            this.BalanceStraxText.text = "tSTRAX: " + straxBalance;
+            this.BalanceStraxText.text = "STRAX: " + Math.Round(straxBalance, 2);
         }, null);
     }
 
@@ -101,37 +101,44 @@ public class SDKIntegrationManager : MonoBehaviour
         string destAddress = this.DestAddrInputField.text;
         Money amount = new Money(Decimal.Parse(this.AmountInputField.text), MoneyUnit.BTC);
 
-        string txHash = null;
-        string error = null;
-
-        Task task = Task.Run(async () =>
+        if (straxBalance < amount.ToUnit(MoneyUnit.BTC))
         {
-            try
-            {
-                txHash = await this.stratisUnityManager.SendTransactionAsync(destAddress, amount);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.ToString());
-                error = e.ToString();
-                return;
-            }
-        });
-
-        while (!task.IsCompleted)
-            yield return null;
-
-        if (error != null)
-        {
-            this.DisplayPopup("Error sending tx: " + error);
+            this.DisplayPopup("Error sending tx: not enough STRAX");
         }
         else
         {
-            this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} STRAX was sent.", txHash, destAddress, amount));
-        }
+            string txHash = null;
+            string error = null;
 
-        this.DestAddrInputField.text = "";
-        this.AmountInputField.text = "";
+            Task task = Task.Run(async () =>
+            {
+                try
+                {
+                    txHash = await this.stratisUnityManager.SendTransactionAsync(destAddress, amount);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                    error = e.ToString();
+                    return;
+                }
+            });
+
+            while (!task.IsCompleted)
+                yield return null;
+
+            if (error != null)
+            {
+                this.DisplayPopup("Error sending tx: " + error);
+            }
+            else
+            {
+                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} STRAX was sent.", txHash, destAddress, amount));
+            }
+
+            this.DestAddrInputField.text = "";
+            this.AmountInputField.text = "";
+        }
     }
 
     private IEnumerator SendRRT_ButtonCall()
@@ -139,37 +146,44 @@ public class SDKIntegrationManager : MonoBehaviour
         string destAddress = this.DestAddrInputField.text;
         ulong amount = ulong.Parse(this.AmountInputField.text);
 
-        string txHash = null;
-        string error = null;
-
-        Task task = Task.Run(async () =>
+        if (rrtBalance < amount)
         {
-            try
-            {
-                txHash = await this.tokenRRT.TransferToAsync(destAddress, amount);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.ToString());
-                error = e.ToString();
-                return;
-            }
-        });
-
-        while (!task.IsCompleted)
-            yield return null;
-
-        if (error != null)
-        {
-            this.DisplayPopup("Error sending tx: " + error);
+            this.DisplayPopup("Error sending tx: not enough RRT");
         }
         else
         {
-            this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} RRT was sent.", txHash, destAddress, amount));
-        }
+            string txHash = null;
+            string error = null;
 
-        this.DestAddrInputField.text = "";
-        this.AmountInputField.text = "";
+            Task task = Task.Run(async () =>
+            {
+                try
+                {
+                    txHash = await this.tokenRRT.TransferToAsync(destAddress, amount);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                    error = e.ToString();
+                    return;
+                }
+            });
+
+            while (!task.IsCompleted)
+                yield return null;
+
+            if (error != null)
+            {
+                this.DisplayPopup("Error sending tx: " + error);
+            }
+            else
+            {
+                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} RRT was sent.", txHash, destAddress, amount));
+            }
+
+            this.DestAddrInputField.text = "";
+            this.AmountInputField.text = "";
+        }
     }
 
     public void PlayerDied(int distance, bool isHighestScore)
