@@ -11,7 +11,7 @@ using Network = NBitcoin.Network;
 
 public class NFTExample : MonoBehaviour
 {
-    public const string ApiUrl = "http://localhost:44336/";
+    public string ApiUrl = "http://localhost:44336/";
 
     private readonly string firstAddrMnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
@@ -37,14 +37,14 @@ public class NFTExample : MonoBehaviour
         Debug.Log("FirstAddr: " + firstAddress);
         Debug.Log("SecondAddr: " + secondAddress);
 
-        string nftAddress = "tCqDXxUn41fi888aYH7yZGDgBn2N4uK24F";
+        string nftAddress = "tG1vSp7Fd8S6UKH54sZ6sfi9frCXpxUrSz";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddress);
 
         ulong balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
         ulong balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
 
         // Mint NFT
-        string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
+        string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
         await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
         Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
 
@@ -65,7 +65,7 @@ public class NFTExample : MonoBehaviour
         string nftName = "gameSword";
         string nftSymbol = "GS";
 
-        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, nftName + "_{0}", false);
+        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false);
 
         ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
 

@@ -328,6 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a370a01f664cc16439cfab9fc5918b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ApiUrl: http://144.76.202.101:44336/
 --- !u!4 &1231546223
 Transform:
   m_ObjectHideFlags: 0

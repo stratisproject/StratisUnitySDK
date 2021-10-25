@@ -12,7 +12,7 @@ using Network = NBitcoin.Network;
 /// </summary>
 public class SCInteractTest : MonoBehaviour
 {
-    public const string ApiUrl = "http://localhost:44336/";
+    public string ApiUrl = "http://localhost:44336/";
 
     private readonly string firstAddrMnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
@@ -86,18 +86,18 @@ public class SCInteractTest : MonoBehaviour
         // For this example we will be using already deployed contract.
 
         // Contract deployment:
-        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", "TestNFT_{0}", false).ConfigureAwait(false);
+        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", false).ConfigureAwait(false);
         //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId).ConfigureAwait(false);
         //Debug.Log(res.NewContractAddress);
-
+        
         Debug.Log("Testing NFT.");
-        string nftAddr = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
+        string nftAddr = "tHK8Qf7WrUaKqk9nF9JsQfPqwpVvJNKNKn";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
 
         ulong balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
         Debug.Log("NFT balance: " + balanceBefore);
 
-        string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
+        string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
 
         await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
         

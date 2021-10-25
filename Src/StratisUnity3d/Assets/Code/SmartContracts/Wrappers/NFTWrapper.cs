@@ -9,13 +9,12 @@ using UnityEngine;
 public class NFTWrapper
 {
     /// <summary>Deploys StandartToken contract and returns txid of deployment transaction.</summary>
-    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol, string tokenURIFormat, bool ownerOnlyMinting)
+    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol, bool ownerOnlyMinting)
     {
         List<string> constructorParameter = new List<string>()
         {
             $"{(int)MethodParameterDataType.String}#{name}",
             $"{(int)MethodParameterDataType.String}#{symbol}",
-            $"{(int)MethodParameterDataType.String}#{tokenURIFormat}",
             $"{(int)MethodParameterDataType.Bool}#{ownerOnlyMinting}"
         };
 
@@ -282,11 +281,12 @@ public class NFTWrapper
 
     /// <summary>Mints new tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> MintAsync(string addrTo)
+    public async Task<string> MintAsync(string addrTo, string uri)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
+            $"{(int)MethodParameterDataType.String}#{uri}",
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Mint", parameters.ToArray());
@@ -294,13 +294,14 @@ public class NFTWrapper
 
     /// <summary>Mints new tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> SafeMintAsync(string addrTo, byte[] data)
+    public async Task<string> SafeMintAsync(string addrTo, string uri, byte[] data)
     {
         var bytesString = BitConverter.ToString(data).Replace("-", "");
 
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
+            $"{(int)MethodParameterDataType.String}#{uri}",
             $"{(int)MethodParameterDataType.ByteArray}#{bytesString}",
         };
 
