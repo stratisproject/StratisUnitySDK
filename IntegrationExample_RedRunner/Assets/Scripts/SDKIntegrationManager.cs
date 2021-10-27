@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BayatGames.SaveGameFree;
 using NBitcoin;
 using Newtonsoft.Json;
 using RedRunner;
@@ -17,7 +18,7 @@ public class SDKIntegrationManager : MonoBehaviour
 {
     public InputField Mnemonic_InputField, DestAddrInputField, AmountInputField;
 
-    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton, Button_CopyAddr, Button_SendKiteNFT, Button_SendChestNFT, Button_MintKiteNFT, Button_MintChestNFT;
+    public Button Button_SetMnmemonic, Button_NewMnmemonic, RefreshButton, SendStraxButton, SendRRTButton, Button_CopyAddr, Button_SendKiteNFT, Button_SendChestNFT, Button_MintKiteNFT, Button_MintChestNFT, SaveMnemonicButton;
 
     public Text AddressText, BalanceStraxText, BalanceRRTText, NFTKiteBalanceText, NFTChestBalanceText;
 
@@ -58,6 +59,7 @@ public class SDKIntegrationManager : MonoBehaviour
     private NFTWrapper nftChest;
 
     private const int NFTContractLogsStartHeight = 2641320;
+    private const string mnmemonicKey = "mnemSave";
 
     private decimal straxBalance = -1;
     private ulong rrtBalance = 0;
@@ -72,6 +74,13 @@ public class SDKIntegrationManager : MonoBehaviour
 
         string initMnemonic = InitWithRandomMnemonic ? new Mnemonic(Wordlist.English, WordCount.Twelve).ToString() : Mnemonic;
 
+        
+
+        if (SaveGame.Exists(mnmemonicKey))
+            initMnemonic = SaveGame.Load<string>(mnmemonicKey);
+        else
+            SaveGame.Save(mnmemonicKey, initMnemonic);
+        
         InitMnemonic(initMnemonic);
     }
 
@@ -160,6 +169,7 @@ public class SDKIntegrationManager : MonoBehaviour
         Button_MintChestNFT.onClick.AddListener(() => this.StartCoroutine(MintNFT_ButtonCall(false)));
         Button_SendKiteNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(true)));
         Button_SendChestNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(false)));
+        SaveMnemonicButton.onClick.AddListener(() => SaveGame.Save(mnmemonicKey, this.Mnemonic_InputField.text));
 
         PopupPanelOk_Button.onClick.AddListener(() => this.PopupPanel.SetActive(false));
     }

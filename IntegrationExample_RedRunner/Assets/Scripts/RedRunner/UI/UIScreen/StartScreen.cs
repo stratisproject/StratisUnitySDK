@@ -24,7 +24,9 @@ namespace RedRunner.UI
                 var InGameScreen = uiManager.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.IN_GAME_SCREEN);
                 if (InGameScreen != null)
                 {
-                    uiManager.OpenScreen(InGameScreen);
+                    GameManager.Singleton.Reset();
+                    var ingameScreen = UIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
+                    UIManager.Singleton.OpenScreen(ingameScreen);
                     GameManager.Singleton.StartGame();
                 }
             });

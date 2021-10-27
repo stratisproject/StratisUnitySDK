@@ -23,6 +23,16 @@ namespace RedRunner.UI
                 UIManager.Singleton.OpenScreen(ingameScreen);
                 GameManager.Singleton.StartGame();
             });
+
+            HomeButton.SetButtonAction(() =>
+            {
+                GameManager.Singleton.Init();
+            });
+
+            ExitButton.SetButtonAction(() =>
+            {
+                GameManager.Singleton.ExitGame();
+            });
         }
 
         public override void UpdateScreenStatus(bool open)
