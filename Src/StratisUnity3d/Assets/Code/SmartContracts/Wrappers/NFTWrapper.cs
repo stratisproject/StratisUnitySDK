@@ -162,7 +162,7 @@ public class NFTWrapper
 
     /// <summary>Checks if 'operator' is an approved operator for 'owner'.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<bool> GetApprovedForAllAsync(string ownderAddress, string operatorAddress)
+    public async Task<bool> GetApprovedForAllAsync(string ownerAddress, string operatorAddress)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -172,7 +172,7 @@ public class NFTWrapper
             ContractAddress = this.contractAddress,
             MethodName = "IsApprovedForAll",
             Sender = stratisUnityManager.GetAddress().ToString(),
-            Parameters = new List<string>() { $"{(int)MethodParameterDataType.ULong}#{ownderAddress}", $"{(int)MethodParameterDataType.ULong}#{operatorAddress}" }
+            Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{ownerAddress}", $"{(int)MethodParameterDataType.Address}#{operatorAddress}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
         return bool.Parse(localCallResult.Return.ToString());
