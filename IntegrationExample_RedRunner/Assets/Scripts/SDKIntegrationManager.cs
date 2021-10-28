@@ -128,7 +128,7 @@ public class SDKIntegrationManager : MonoBehaviour
         SynchronizationContext.Current.Post(state =>
         {
             this.BalanceRRTText.text = "RRT: " + rrtBalance;
-            this.BalanceStraxText.text = "STRAX: " + Math.Round(straxBalance, 2);
+            this.BalanceStraxText.text = "CRS: " + Math.Round(straxBalance, 2);
             this.NFTKiteBalanceText.text = "Kite: " + NFTKiteBalance;
             this.NFTChestBalanceText.text = "Chest: " + NFTChestBalance;
         }, null);

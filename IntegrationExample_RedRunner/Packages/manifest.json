@@ -2,6 +2,7 @@
   "dependencies": {
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
+    "com.unity.adaptiveperformance": "2.2.1",
     "com.unity.ads": "3.7.1",
     "com.unity.analytics": "3.5.3",
     "com.unity.collab-proxy": "1.7.1",
@@ -14,6 +15,7 @@
     "com.unity.test-framework": "1.1.27",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.5.6",
+    "com.unity.toolchain.win-x86_64-linux-x86_64": "0.1.21-preview",
     "com.unity.ugui": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.1.7",
     "com.unity.modules.ai": "1.0.0",
