@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
+using Stratis.SmartContracts;
 using Unity3dApi;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -94,14 +95,14 @@ public class SCInteractTest : MonoBehaviour
         string nftAddr = "tHK8Qf7WrUaKqk9nF9JsQfPqwpVvJNKNKn";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
 
-        ulong balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
         Debug.Log("NFT balance: " + balanceBefore);
 
         string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
 
         await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
-        
-        ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+
+        UInt256 balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 
         Assert.IsTrue(balanceAfter == balanceBefore + 1);
 

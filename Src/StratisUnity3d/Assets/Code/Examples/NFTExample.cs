@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NBitcoin;
 using Newtonsoft.Json;
 using Stratis.Sidechains.Networks;
+using Stratis.SmartContracts;
 using Unity3dApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
@@ -33,15 +34,16 @@ public class NFTExample : MonoBehaviour
         stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
         firstAddress = stratisUnityManager.GetAddress().ToString();
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
+        decimal balance = await stratisUnityManager.GetBalanceAsync();
 
-        Debug.Log("FirstAddr: " + firstAddress);
+        Debug.Log("FirstAddr: " + firstAddress + "    Balance: " + balance);
         Debug.Log("SecondAddr: " + secondAddress);
 
         string nftAddress = "tG1vSp7Fd8S6UKH54sZ6sfi9frCXpxUrSz";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddress);
 
-        ulong balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
-        ulong balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
+        UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
 
         // Mint NFT
         string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
