@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Stratis.SmartContracts;
 using Stratis.SmartContracts.CLR.Serialization;
 using Unity3dApi;
 using UnityEngine;
@@ -108,7 +109,7 @@ public class NFTWrapper
     /// <summary>Returns the number of NFTs owned by 'owner'. NFTs assigned to the zero address are
     /// considered invalid, and this function throws for queries about the zero address.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<ulong> BalanceOfAsync(string addr)
+    public async Task<UInt256> BalanceOfAsync(string addr)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -121,12 +122,12 @@ public class NFTWrapper
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{addr}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
-        return ulong.Parse(localCallResult.Return.ToString());
+        return UInt256.Parse(localCallResult.Return.ToString());
     }
 
     /// <summary>Returns the address of the owner of the NFT. NFTs assigned to zero address are considered invalid, and queries about them do throw.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<string> OwnerOfAsync(ulong tokenId)
+    public async Task<string> OwnerOfAsync(UInt256 tokenId)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -136,7 +137,7 @@ public class NFTWrapper
             ContractAddress = this.contractAddress,
             MethodName = "OwnerOf",
             Sender = stratisUnityManager.GetAddress().ToString(),
-            Parameters = new List<string>() { $"{(int)MethodParameterDataType.ULong}#{tokenId}" }
+            Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
         return localCallResult.Return.ToString();
@@ -144,7 +145,7 @@ public class NFTWrapper
 
     /// <summary>Get the approved address for a single NFT.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<string> GetApprovedAsync(ulong tokenId)
+    public async Task<string> GetApprovedAsync(UInt256 tokenId)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -154,7 +155,7 @@ public class NFTWrapper
             ContractAddress = this.contractAddress,
             MethodName = "GetApproved",
             Sender = stratisUnityManager.GetAddress().ToString(),
-            Parameters = new List<string>() { $"{(int)MethodParameterDataType.ULong}#{tokenId}" }
+            Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
         return localCallResult.Return.ToString();
@@ -180,7 +181,7 @@ public class NFTWrapper
 
     /// <remarks>Local call.</remarks>
     /// <remarks>Local call.</remarks>
-    public async Task<string> TokenURIAsync(ulong tokenId)
+    public async Task<string> TokenURIAsync(UInt256 tokenId)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -190,7 +191,7 @@ public class NFTWrapper
             ContractAddress = this.contractAddress,
             MethodName = "TokenURI",
             Sender = stratisUnityManager.GetAddress().ToString(),
-            Parameters = new List<string>() { $"{(int)MethodParameterDataType.ULong}#{tokenId}" }
+            Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
         return localCallResult.Return.ToString();
@@ -198,7 +199,7 @@ public class NFTWrapper
 
     /// <summary>Transfers the ownership of an NFT from one address to another address. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> SafeTransferFromAsync(string addrFrom, string addrTo, ulong tokenId, byte[] data)
+    public async Task<string> SafeTransferFromAsync(string addrFrom, string addrTo, UInt256 tokenId, byte[] data)
     {
         var bytesString = BitConverter.ToString(data).Replace("-", "");
 
@@ -206,7 +207,7 @@ public class NFTWrapper
         {
             $"{(int)MethodParameterDataType.Address}#{addrFrom}",
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}",
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}",
             $"{(int)MethodParameterDataType.ByteArray}#{bytesString}"
         };
 
@@ -215,13 +216,13 @@ public class NFTWrapper
 
     /// <summary>Transfers the ownership of an NFT from one address to another address. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> SafeTransferFromAsync(string addrFrom, string addrTo, ulong tokenId)
+    public async Task<string> SafeTransferFromAsync(string addrFrom, string addrTo, UInt256 tokenId)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addrFrom}",
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}"
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SafeTransferFrom", parameters.ToArray());
@@ -229,13 +230,13 @@ public class NFTWrapper
 
     /// <summary>Transfers the ownership of an NFT from one address to another address. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> TransferFromAsync(string addrFrom, string addrTo, ulong tokenId)
+    public async Task<string> TransferFromAsync(string addrFrom, string addrTo, UInt256 tokenId)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addrFrom}",
             $"{(int)MethodParameterDataType.Address}#{addrTo}",
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}"
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferFrom", parameters.ToArray());
@@ -243,12 +244,12 @@ public class NFTWrapper
     
     /// <summary>Set or reaffirm the approved address for an NFT. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> ApproveAsync(string addr, ulong tokenId)
+    public async Task<string> ApproveAsync(string addr, UInt256 tokenId)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addr}",
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}"
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Approve", parameters.ToArray());
@@ -256,12 +257,12 @@ public class NFTWrapper
 
     /// <summary>Enables or disables approval for a third party ("operator") to manage all of sender's assets. It also Logs the ApprovalForAll event.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> SetApprovalForAllAsync(string addr, ulong tokenId)
+    public async Task<string> SetApprovalForAllAsync(string addr, UInt256 tokenId)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addr}",
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}"
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "SetApprovalForAll", parameters.ToArray());
@@ -310,11 +311,11 @@ public class NFTWrapper
 
     /// <summary>Burns a tokens</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> BurnAsync(ulong tokenId)
+    public async Task<string> BurnAsync(UInt256 tokenId)
     {
         List<string> parameters = new List<string>()
         {
-            $"{(int)MethodParameterDataType.ULong}#{tokenId}",
+            $"{(int)MethodParameterDataType.UInt256}#{tokenId}",
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Burn", parameters.ToArray());
@@ -333,5 +334,5 @@ public partial class TransferLogEvent
     public string To { get; set; }
 
     [JsonProperty("tokenId")]
-    public long TokenId { get; set; }
+    public UInt256 TokenId { get; set; }
 }
