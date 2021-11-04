@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,6 +43,15 @@ public class NFTExample : MonoBehaviour
         string nftAddress = "tG1vSp7Fd8S6UKH54sZ6sfi9frCXpxUrSz";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddress);
 
+        await client.WatchNftContractAsync(nftAddress);
+        List<string> ids = (await client.GetOwnedNftsAsync(firstAddress)).OwnedIDsByContractAddress.ToList().First().Value.Select(x => x.ToString()).ToList();
+        string idsJoined = String.Join(",", ids);
+        Debug.Log("IDs: " + idsJoined);
+
+        ICollection<string> watchedContracts = await client.GetWatchedNFTContractsAsync();
+        string watchedContractsString = String.Join(",", watchedContracts);
+        Debug.Log("Watched contracts: " + watchedContractsString);
+        
         UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
         UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
 
