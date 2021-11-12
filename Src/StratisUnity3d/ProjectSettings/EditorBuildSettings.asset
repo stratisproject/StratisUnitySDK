@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/NFTWallet.unity
+    guid: cedc6b4fb0ee2c94baff30990f71e006
   m_configObjects: {}
