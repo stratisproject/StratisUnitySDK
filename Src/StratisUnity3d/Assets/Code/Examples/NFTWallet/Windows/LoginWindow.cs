@@ -50,7 +50,7 @@ public class LoginWindow : WindowBase
             PlayerPrefs.SetString(MnemonicKey, mnemonic);
 
             NFTWallet.Instance.Initialize(mnemonic);
-            NFTWalletWindowManager.Instance.HomeWindow.Show();
+            NFTWalletWindowManager.Instance.WalletWindow.Show();
         });
     }
 
