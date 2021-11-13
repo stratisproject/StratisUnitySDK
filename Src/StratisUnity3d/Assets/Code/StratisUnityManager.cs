@@ -75,7 +75,7 @@ public class StratisUnityManager
             .AddCoins(coins)
             .AddKeys(this.privateKey)
             .Send(addrTo, sendAmount)
-            .SendFees(DefaultFee)
+            .SendFees(DefaultFee * coins.Length)
             .SetChange(this.address)
             .BuildTransaction(true);
     

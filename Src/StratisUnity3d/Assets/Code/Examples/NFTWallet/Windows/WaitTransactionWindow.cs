@@ -47,6 +47,8 @@ public class WaitTransactionWindow : WindowBase
             await Task.Delay(500);
         }
 
+        this.TxHashText.text = string.Empty;
+
         await this.HideAsync();
     }
 }
