@@ -32,7 +32,7 @@ public class CreateNFTWindow : WindowBase
             await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync(resultString, "NFT DEPLOYMENT");
 
             if (receipt.Success)
-                NFTWallet.Instance.RegisterDeployedNFT(nftName, symbol, ownerOnlyMinting, receipt.NewContractAddress, NFTWallet.Instance.StratisUnityManager.GetAddress().ToString());
+                await NFTWallet.Instance.RegisterDeployedNFTAsync(nftName, symbol, ownerOnlyMinting, receipt.NewContractAddress, NFTWallet.Instance.StratisUnityManager.GetAddress().ToString());
         });
     }
 }
