@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 using NBitcoin;
+using Newtonsoft.Json;
 using Stratis.Sidechains.Networks;
 using Unity3dApi;
 using UnityEngine;
@@ -17,6 +19,8 @@ public class NFTWallet : MonoBehaviour
 
     [HideInInspector]
     public StratisUnityManager StratisUnityManager;
+
+    private const string DeployedNFTsKey = "deployedNFTs";
 
     void Awake()
     {
@@ -49,8 +53,37 @@ public class NFTWallet : MonoBehaviour
         return true;
     }
 
-    public void RegisterDeployedNFT(string name, string symbol, bool ownerOnlyMinting, string contractAddress)
+    public void RegisterDeployedNFT(string nftName, string symbol, bool ownerOnlyMinting, string contractAddress, string ownerAddress)
     {
-        // TODO
+        List<DeployedNFTModel> knownNfts = LoadKnownNfts();
+
+        knownNfts.Add(new DeployedNFTModel()
+        {
+            ContractAddress = contractAddress,
+            NftName = nftName,
+            OwnerOnlyMinting = ownerOnlyMinting,
+            Symbol = symbol,
+            OwnerAddress = ownerAddress
+        });
+        
+        this.PersistKnownNfts(knownNfts);
+    }
+
+    public List<DeployedNFTModel> LoadKnownNfts()
+    {
+        if (!PlayerPrefs.HasKey(DeployedNFTsKey))
+            return new List<DeployedNFTModel>();
+
+        string json = PlayerPrefs.GetString(DeployedNFTsKey);
+
+        List<DeployedNFTModel> nfts = JsonConvert.DeserializeObject<List<DeployedNFTModel>>(json);
+
+        return nfts;
+    }
+
+    public void PersistKnownNfts(List<DeployedNFTModel> knownNfts)
+    {
+        string json = JsonConvert.SerializeObject(knownNfts);
+        PlayerPrefs.SetString(DeployedNFTsKey, json);
     }
 }
