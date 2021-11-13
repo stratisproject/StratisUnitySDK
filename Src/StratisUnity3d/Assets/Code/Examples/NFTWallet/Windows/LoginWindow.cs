@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using NBitcoin;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +12,7 @@ public class LoginWindow : WindowBase
 
     public Text MnemonicInputFieldPlaceholderText;
 
-    private const string MnemonicKey = "";
+    private const string MnemonicKey = "MnemonicST";
 
     async void Awake()
     {
@@ -59,7 +60,7 @@ public class LoginWindow : WindowBase
         });
     }
 
-    void Start()
+    public override UniTask ShowAsync(bool hideOtherWindows = true)
     {
         bool mnemonicExists = PlayerPrefs.HasKey(MnemonicKey);
 
@@ -70,5 +71,7 @@ public class LoginWindow : WindowBase
         }
 
         NewMnemonicWarningText.gameObject.SetActive(!mnemonicExists);
+
+        return base.ShowAsync(hideOtherWindows);
     }
 }
