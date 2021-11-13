@@ -3,7 +3,6 @@ using NBitcoin;
 using Stratis.Bitcoin.Networks;
 using Unity3dApi;
 using Network = NBitcoin.Network;
-using ValidatedAddress = Unity3dApi.ValidatedAddress;
 
 public class TestApiMethods : MonoBehaviour
 {
