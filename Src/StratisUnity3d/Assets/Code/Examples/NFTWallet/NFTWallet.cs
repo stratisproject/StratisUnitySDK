@@ -48,4 +48,9 @@ public class NFTWallet : MonoBehaviour
 
         return true;
     }
+
+    public void RegisterDeployedNFT(string name, string symbol, bool ownerOnlyMinting, string contractAddress)
+    {
+        // TODO
+    }
 }
