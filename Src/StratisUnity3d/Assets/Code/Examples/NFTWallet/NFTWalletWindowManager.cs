@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class NFTWalletWindowManager : MonoBehaviour
@@ -24,16 +25,16 @@ public class NFTWalletWindowManager : MonoBehaviour
         this.allWindows = new List<WindowBase>() { LoginWindow, PopupWindow, WalletWindow, MyCollectionWindow, CreateNftWindow, SendWindow, MintWindow, BurnWindow };
     }
 
-    void Start()
+    async void Start()
     {
-        this.LoginWindow.Show();
+        await this.LoginWindow.ShowAsync();
     }
 
-    public void HideAllWindows()
+    public async UniTask HideAllWindowsAsync()
     {
         foreach (WindowBase window in this.allWindows)
         {
-            window.Hide();
+            await window.HideAsync();
         }
     }
 }

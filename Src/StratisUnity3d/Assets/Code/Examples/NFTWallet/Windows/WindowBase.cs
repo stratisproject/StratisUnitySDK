@@ -1,16 +1,17 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class WindowBase : MonoBehaviour
 {
-    public void Show(bool hideOtherWindows = true)
+    public virtual async UniTask ShowAsync(bool hideOtherWindows = true)
     {
         if (hideOtherWindows)
-            NFTWalletWindowManager.Instance.HideAllWindows();
+            await NFTWalletWindowManager.Instance.HideAllWindowsAsync();
 
         this.gameObject.SetActive(true);
     }
 
-    public void Hide()
+    public virtual async UniTask HideAsync()
     {
         this.gameObject.SetActive(false);
     }

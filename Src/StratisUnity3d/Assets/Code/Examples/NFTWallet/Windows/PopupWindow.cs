@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 
 public class PopupWindow : WindowBase
@@ -7,14 +8,14 @@ public class PopupWindow : WindowBase
 
     public void Start()
     {
-        this.Close.onClick.AddListener(delegate { this.Hide(); });
+        this.Close.onClick.AddListener(async delegate { await this.HideAsync(); });
     }
 
-    public void ShowPopup(string message, string title = "")
+    public async UniTask ShowPopupAsync(string message, string title = "")
     {
         this.MessageText.text = message;
         this.TitleText.text = title;
 
-        this.Show(false);
+        await this.ShowAsync(false);
     }
 }
