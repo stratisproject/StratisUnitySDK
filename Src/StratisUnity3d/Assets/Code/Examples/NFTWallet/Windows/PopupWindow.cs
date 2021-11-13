@@ -6,7 +6,7 @@ public class PopupWindow : WindowBase
     public Button Close;
     public Text TitleText, MessageText;
 
-    public void Start()
+    public async void Awake()
     {
         this.Close.onClick.AddListener(async delegate { await this.HideAsync(); });
     }

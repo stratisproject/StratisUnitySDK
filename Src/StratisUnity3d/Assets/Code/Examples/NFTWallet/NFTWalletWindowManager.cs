@@ -15,6 +15,7 @@ public class NFTWalletWindowManager : MonoBehaviour
     public SendWindow SendWindow;
     public MintWindow MintWindow;
     public BurnWindow BurnWindow;
+    public WaitTransactionWindow WaitTransactionWindow;
 
     private List<WindowBase> allWindows;
     
@@ -22,7 +23,7 @@ public class NFTWalletWindowManager : MonoBehaviour
     {
         Instance = this;
 
-        this.allWindows = new List<WindowBase>() { LoginWindow, PopupWindow, WalletWindow, MyCollectionWindow, CreateNftWindow, SendWindow, MintWindow, BurnWindow };
+        this.allWindows = new List<WindowBase>() { LoginWindow, PopupWindow, WalletWindow, MyCollectionWindow, CreateNftWindow, SendWindow, MintWindow, BurnWindow, WaitTransactionWindow };
     }
 
     async void Start()
