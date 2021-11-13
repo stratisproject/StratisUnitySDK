@@ -17,7 +17,7 @@ public class StandartTokenWrapper
             $"{(int)MethodParameterDataType.UInt}#{decimals}"
         };
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
 
         return txId;
@@ -46,7 +46,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>()
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -64,7 +64,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>()
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -82,7 +82,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>()
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return ulong.Parse(localCallResult.Return.ToString());
     }
 
@@ -100,7 +100,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{address}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return ulong.Parse(localCallResult.Return.ToString());
     }
 
@@ -118,7 +118,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>()
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return uint.Parse(localCallResult.Return.ToString());
     }
 
@@ -136,7 +136,7 @@ public class StandartTokenWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{addressOwner}", $"{(int)MethodParameterDataType.Address}#{addressSpender}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return ulong.Parse(localCallResult.Return.ToString());
     }
 

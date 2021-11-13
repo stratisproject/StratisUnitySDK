@@ -52,7 +52,7 @@ public class TestUI : MonoBehaviour
         {
             try
             {
-                await client.TipAsync().ConfigureAwait(false);
+                await client.TipAsync();
             }
             catch (Exception e)
             {

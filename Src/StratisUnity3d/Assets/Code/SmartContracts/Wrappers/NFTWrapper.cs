@@ -19,7 +19,7 @@ public class NFTWrapper
             $"{(int)MethodParameterDataType.Bool}#{ownerOnlyMinting}"
         };
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
 
         return txId;
@@ -48,7 +48,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -66,7 +66,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -84,7 +84,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -102,7 +102,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt}#{interfaceId}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return bool.Parse(localCallResult.Return.ToString());
     }
 
@@ -121,7 +121,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{addr}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return UInt256.Parse(localCallResult.Return.ToString());
     }
 
@@ -139,7 +139,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -157,7 +157,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 
@@ -175,7 +175,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{ownerAddress}", $"{(int)MethodParameterDataType.Address}#{operatorAddress}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return bool.Parse(localCallResult.Return.ToString());
     }
 
@@ -193,7 +193,7 @@ public class NFTWrapper
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.UInt256}#{tokenId}" }
         };
-        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
     }
 

@@ -28,10 +28,10 @@ public class TestSmartContracts : MonoBehaviour
         Debug.Log("Your balance: " + balance);
 
         // Deploy DAO contract
-        //await this.DeployDaoContractAsync(stratisUnityManager).ConfigureAwait(false);
+        //await this.DeployDaoContractAsync(stratisUnityManager);
         //return;
 
-        ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a3647954b0476d75173d91d0c8db0267c4894d1f6").ConfigureAwait(false);
+        ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a3647954b0476d75173d91d0c8db0267c4894d1f6");
         
         bool isSuccess = receipt.Success;
         string contractAddr = receipt.NewContractAddress;
@@ -49,12 +49,12 @@ public class TestSmartContracts : MonoBehaviour
             Sender = stratisUnityManager.GetAddress().ToString(),
             Parameters = new List<string>()
         };
-        LocalExecutionResult localCallResult = await client.LocalCallAsync(localCallData).ConfigureAwait(false);
+        LocalExecutionResult localCallResult = await client.LocalCallAsync(localCallData);
         Debug.Log("MaxVotingDuration: " + localCallResult.Return.ToString());
 
         // Make an on-chain smart contract call.
         string callId = await stratisUnityManager.SendCallContractTransactionAsync("CNiJEPppjvBf1zAAyjcLD81QbVd8NQ59Bv",
-            "WhitelistAddress", new string[] {"9#CPokn4GjJHtM7t2b99pdsbLuGd4RbM7pGL"}).ConfigureAwait(false);
+            "WhitelistAddress", new string[] {"9#CPokn4GjJHtM7t2b99pdsbLuGd4RbM7pGL"});
 
         // Call response can be taken from receipt once tx is mined.
 
@@ -65,7 +65,7 @@ public class TestSmartContracts : MonoBehaviour
     {
         // Deploy DAO contract
         string constructorParameter = ((int)MethodParameterDataType.UInt) + "#" + "18900";
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.DaoContract.ByteCode, new string[] { constructorParameter }, 0).ConfigureAwait(false);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.DaoContract.ByteCode, new string[] { constructorParameter }, 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
     }
 }

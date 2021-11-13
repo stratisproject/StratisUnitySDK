@@ -20,22 +20,31 @@ public class WalletWindow : WindowBase
 
         SendTxButton.onClick.AddListener(async delegate
         {
-            string destAddress = this.DestinationAddressInputField.text;
-            Money amount = new Money(Decimal.Parse(this.AmountInputField.text), MoneyUnit.BTC);
-
-            this.DestinationAddressInputField.text = this.AmountInputField.text = string.Empty;
-
-            if (destAddress == NFTWallet.Instance.StratisUnityManager.GetAddress().ToString())
+            try
             {
-                await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("Destination address can't be your address.", "ERROR");
-                return;
-            }
+                string destAddress = this.DestinationAddressInputField.text;
+                Money amount = new Money(Decimal.Parse(this.AmountInputField.text), MoneyUnit.BTC);
 
-            long currentBalanceSat = await NFTWallet.Instance.StratisUnityManager.Client.GetAddressBalanceAsync(destAddress);
+                this.DestinationAddressInputField.text = this.AmountInputField.text = string.Empty;
 
-            Task<string> sendTxTask = NFTWallet.Instance.StratisUnityManager.SendTransactionAsync(destAddress, amount);
+                if (destAddress == NFTWallet.Instance.StratisUnityManager.GetAddress().ToString())
+                {
+                    await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("Destination address can't be your address.", "ERROR");
+                    return;
+                }
+
+                long currentBalanceSat = await NFTWallet.Instance.StratisUnityManager.Client.GetAddressBalanceAsync(destAddress);
+
+                Task<string> sendTxTask = NFTWallet.Instance.StratisUnityManager.SendTransactionAsync(destAddress, amount);
             
-            await NFTWalletWindowManager.Instance.WaitTransactionWindow.DisplayUntilDestBalanceChanges(destAddress, currentBalanceSat, sendTxTask);
+                await NFTWalletWindowManager.Instance.WaitTransactionWindow.DisplayUntilDestBalanceChanges(destAddress, currentBalanceSat, sendTxTask);
+
+                await this.RefreshBalanceAsync();
+            }
+            catch (Exception e)
+            {
+                await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync(e.ToString(), "ERROR");
+            }
         });
     }
 

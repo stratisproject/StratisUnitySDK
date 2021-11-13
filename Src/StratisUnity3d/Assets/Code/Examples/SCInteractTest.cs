@@ -39,10 +39,10 @@ public class SCInteractTest : MonoBehaviour
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
 
         // StandartTokenWrapper test.
-        //await this.StandartTokenWrapperTestAsync().ConfigureAwait(false);
+        //await this.StandartTokenWrapperTestAsync();
 
         // NFT wrapper test.
-        await this.NFTWrapperTestAsync().ConfigureAwait(false);
+        await this.NFTWrapperTestAsync();
     }
 
     private async Task StandartTokenWrapperTestAsync()
@@ -67,7 +67,7 @@ public class SCInteractTest : MonoBehaviour
         // Transfer 1 to 2nd address.
         var txId = await stw.TransferToAsync(secondAddress, 1);
 
-        var receipt = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        var receipt = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
         Assert.IsTrue(bool.Parse(receipt.ReturnValue));
 
@@ -86,22 +86,22 @@ public class SCInteractTest : MonoBehaviour
         // For this example we will be using already deployed contract.
 
         // Contract deployment:
-        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", false).ConfigureAwait(false);
-        //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId).ConfigureAwait(false);
+        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", false);
+        //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId);
         //Debug.Log(res.NewContractAddress);
         
         Debug.Log("Testing NFT.");
         string nftAddr = "tHK8Qf7WrUaKqk9nF9JsQfPqwpVvJNKNKn";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
 
-        UInt256 balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceBefore = await nft.BalanceOfAsync(this.firstAddress);
         Debug.Log("NFT balance: " + balanceBefore);
 
-        string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
+        string mintId = await nft.MintAsync(firstAddress, "uri");
 
-        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId);
 
-        UInt256 balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceAfter = await nft.BalanceOfAsync(this.firstAddress);
 
         Assert.IsTrue(balanceAfter == balanceBefore + 1);
 

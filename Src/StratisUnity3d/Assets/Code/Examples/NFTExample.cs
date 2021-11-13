@@ -52,20 +52,20 @@ public class NFTExample : MonoBehaviour
         string watchedContractsString = String.Join(",", watchedContracts);
         Debug.Log("Watched contracts: " + watchedContractsString);
         
-        UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
-        UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
+        UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress);
+        UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress);
 
         // Mint NFT
-        string mintId = await nft.MintAsync(firstAddress, "uri").ConfigureAwait(false);
-        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
+        string mintId = await nft.MintAsync(firstAddress, "uri");
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId);
         Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
 
         string transferId = await nft.TransferFromAsync(firstAddress, secondAddress, 1);
-        ReceiptResponse transferReceipt = await this.stratisUnityManager.WaitTillReceiptAvailable(transferId).ConfigureAwait(false);
+        ReceiptResponse transferReceipt = await this.stratisUnityManager.WaitTillReceiptAvailable(transferId);
         Debug.Log("NFT transfer: Success: " + transferReceipt.Success + "   returned: " + transferReceipt.ReturnValue + "  transferID: " + transferId);
 
-        balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
-        balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
+        balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress);
+        balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress);
         Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
 
         // Display all transfers
@@ -79,7 +79,7 @@ public class NFTExample : MonoBehaviour
 
         string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false);
 
-        ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
         Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
     }
