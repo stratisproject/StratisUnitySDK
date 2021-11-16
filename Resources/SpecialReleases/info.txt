@@ -1,0 +1,1 @@
+StratisUnity3d_v2_UpdatedNFT - contains updated whitelisted smartcontracts file which contains most recent nft contract. Also NFTWrapper is updated from 2.2 beta sdk.
