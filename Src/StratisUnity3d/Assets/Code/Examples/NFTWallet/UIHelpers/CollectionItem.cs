@@ -6,4 +6,13 @@ public class CollectionItem : MonoBehaviour
     public Text TitleText, DescriptionText;
 
     public Image NFTImage;
+
+    [HideInInspector]
+    public long NFTID;
+
+    [HideInInspector]
+    public string ContractAddr;
+
+    [HideInInspector]
+    public string NFTUri;
 }

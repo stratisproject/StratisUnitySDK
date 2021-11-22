@@ -2724,6 +2724,7 @@ GameObject:
   m_Component:
   - component: {fileID: 291465009}
   - component: {fileID: 291465010}
+  - component: {fileID: 291465011}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -2748,8 +2749,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00002193451, y: -0.000023675804}
-  m_SizeDelta: {x: 0, y: 789}
+  m_AnchoredPosition: {x: -0.00002193451, y: -0.000030517578}
+  m_SizeDelta: {x: 0.0001, y: 432.3357}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &291465010
 MonoBehaviour:
@@ -2772,9 +2773,23 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 425, y: 550}
-  m_Spacing: {x: 0, y: 0}
+  m_Spacing: {x: 0, y: 10}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &291465011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 291465008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 0
 --- !u!1 &297735394
 GameObject:
   m_ObjectHideFlags: 0
@@ -5671,6 +5686,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccfd79ea402427841b327dc649b668ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ContentGameObject: {fileID: 291465008}
+  CollectionCopyFromItem: {fileID: 1981213269}
+  SpawnedItems: []
 --- !u!114 &712493003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12745,7 +12763,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 32
   m_Viewport: {fileID: 1856518862}
   m_HorizontalScrollbar: {fileID: 2081270791}
   m_VerticalScrollbar: {fileID: 1847042158}
@@ -15008,12 +15026,12 @@ GameObject:
   - component: {fileID: 1981213267}
   - component: {fileID: 1981213269}
   m_Layer: 5
-  m_Name: NFTItem_Panel
+  m_Name: NFTItem_CopyFrom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1981213266
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15031,10 +15049,10 @@ RectTransform:
   m_Father: {fileID: 291465009}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 212.5, y: -275}
+  m_SizeDelta: {x: 425, y: 550}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1981213267
 MonoBehaviour:
@@ -15049,7 +15067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8011926, g: 0.9412507, b: 0.9716981, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15089,6 +15107,9 @@ MonoBehaviour:
   TitleText: {fileID: 1849666473}
   DescriptionText: {fileID: 2015765555}
   NFTImage: {fileID: 1063377050}
+  NFTID: 0
+  ContractAddr: 
+  NFTUri: 
 --- !u!1 &2005793944
 GameObject:
   m_ObjectHideFlags: 0
