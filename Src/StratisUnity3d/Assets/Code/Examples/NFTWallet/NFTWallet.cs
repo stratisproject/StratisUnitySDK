@@ -14,7 +14,7 @@ public class NFTWallet : MonoBehaviour
 {
     public static NFTWallet Instance;
 
-    private readonly string apiUrl = "http://localhost:44336/";
+    public string ApiUrl = "http://localhost:44336/";
     private readonly Network network = new CirrusTest();
 
     [HideInInspector]
@@ -32,7 +32,7 @@ public class NFTWallet : MonoBehaviour
     {
         try
         {
-            this.StratisUnityManager = new StratisUnityManager(new Unity3dClient(apiUrl), network,
+            this.StratisUnityManager = new StratisUnityManager(new Unity3dClient(ApiUrl), network,
                 new Mnemonic(mnemonic, Wordlist.English));
 
             await this.StratisUnityManager.GetBalanceAsync();
