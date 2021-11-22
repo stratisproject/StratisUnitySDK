@@ -8,5 +8,5 @@ public class DeployedNFTModel
 
     public string OwnerAddress { get; set; }
 
-    public bool OwnerOnlyMinting { get; set; }
+    public bool? OwnerOnlyMinting { get; set; }
 }

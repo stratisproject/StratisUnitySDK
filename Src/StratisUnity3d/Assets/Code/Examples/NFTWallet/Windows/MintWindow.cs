@@ -11,9 +11,9 @@ public class MintWindow : WindowBase
 {
     public Dropdown NFTContractSelect_Dropdown;
 
-    public Button MintButton;
+    public Button MintButton, TrackButton;
 
-    public InputField MintToAddrInputField, UriInputField, MetadataInputField;
+    public InputField MintToAddrInputField, UriInputField, MetadataInputField, TrackContractInputField;
 
     private List<DeployedNFTModel> nftsForDeployment;
 
@@ -59,12 +59,38 @@ public class MintWindow : WindowBase
 
             await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync(resultString, "NFT MINT");
         });
+
+        TrackButton.onClick.AddListener(async delegate
+        {
+            string contractAddr = TrackContractInputField.text;
+            TrackContractInputField.text = string.Empty;
+
+            NFTWrapper wrapper = new NFTWrapper(NFTWallet.Instance.StratisUnityManager, contractAddr);
+
+            string nftname, ownerAddr, symbol;
+
+            try
+            {
+                nftname = await wrapper.NameAsync();
+                ownerAddr = await wrapper.OwnerAsync();
+                symbol = await wrapper.SymbolAsync();
+            }
+            catch (Exception e)
+            {
+                await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("Error: invalid NFT contract address.", "ERROR");
+                return;
+            }
+
+            await NFTWallet.Instance.RegisterKnownNFTAsync(nftname, symbol, null, contractAddr, ownerAddr);
+
+            await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("NFT was added to watch list.", "NFT WATCH");
+        });
     }
 
     public override UniTask ShowAsync(bool hideOtherWindows = true)
     {
         string myAddress = NFTWallet.Instance.StratisUnityManager.GetAddress().ToString();
-        nftsForDeployment = NFTWallet.Instance.LoadKnownNfts().Where(x => !x.OwnerOnlyMinting || x.OwnerAddress == myAddress).ToList();
+        nftsForDeployment = NFTWallet.Instance.LoadKnownNfts().Where(x => x.OwnerOnlyMinting == null || (!x.OwnerOnlyMinting.Value || x.OwnerAddress == myAddress)).ToList();
         selectedNft = nftsForDeployment.FirstOrDefault();
 
         NFTContractSelect_Dropdown.ClearOptions();

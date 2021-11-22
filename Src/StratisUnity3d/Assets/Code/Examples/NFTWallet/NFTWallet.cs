@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 using NBitcoin;
 using Newtonsoft.Json;
 using Stratis.Sidechains.Networks;
+using Unity.VisualScripting;
 using Unity3dApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
@@ -53,9 +55,14 @@ public class NFTWallet : MonoBehaviour
         return true;
     }
 
-    public async UniTask RegisterDeployedNFTAsync(string nftName, string symbol, bool ownerOnlyMinting, string contractAddress, string ownerAddress)
+    public async UniTask RegisterKnownNFTAsync(string nftName, string symbol, bool? ownerOnlyMinting, string contractAddress, string ownerAddress)
     {
         List<DeployedNFTModel> knownNfts = LoadKnownNfts();
+
+        await this.StratisUnityManager.Client.WatchNftContractAsync(contractAddress);
+
+        if (knownNfts.Any(x => x.ContractAddress == contractAddress))
+            return;
 
         knownNfts.Add(new DeployedNFTModel()
         {
@@ -67,8 +74,6 @@ public class NFTWallet : MonoBehaviour
         });
         
         this.PersistKnownNfts(knownNfts);
-
-        await this.StratisUnityManager.Client.WatchNftContractAsync(contractAddress);
     }
 
     public List<DeployedNFTModel> LoadKnownNfts()
