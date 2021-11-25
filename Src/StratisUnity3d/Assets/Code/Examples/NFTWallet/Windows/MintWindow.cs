@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Unity3dApi;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MintWindow : WindowBase
 {
     public Dropdown NFTContractSelect_Dropdown;
 
-    public Button MintButton, TrackButton;
+    public Button MintButton, TrackButton, CopySelectedContractButton;
 
     public InputField MintToAddrInputField, UriInputField, MetadataInputField, TrackContractInputField;
 
@@ -65,25 +66,19 @@ public class MintWindow : WindowBase
             string contractAddr = TrackContractInputField.text;
             TrackContractInputField.text = string.Empty;
 
-            NFTWrapper wrapper = new NFTWrapper(NFTWallet.Instance.StratisUnityManager, contractAddr);
+            bool success = await NFTWallet.Instance.RegisterKnownNFTAsync(contractAddr);
 
-            string nftname, ownerAddr, symbol;
-
-            try
-            {
-                nftname = await wrapper.NameAsync();
-                ownerAddr = await wrapper.OwnerAsync();
-                symbol = await wrapper.SymbolAsync();
-            }
-            catch (Exception e)
-            {
+            if (!success)
                 await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("Error: invalid NFT contract address.", "ERROR");
-                return;
-            }
+           else
+                await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("NFT was added to watch list.", "NFT WATCH");
+        });
 
-            await NFTWallet.Instance.RegisterKnownNFTAsync(nftname, symbol, null, contractAddr, ownerAddr);
+        CopySelectedContractButton.onClick.AddListener(delegate
+        {
+            string contrAddr = selectedNft?.ContractAddress;
 
-            await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("NFT was added to watch list.", "NFT WATCH");
+            GUIUtility.systemCopyBuffer = contrAddr;
         });
     }
 

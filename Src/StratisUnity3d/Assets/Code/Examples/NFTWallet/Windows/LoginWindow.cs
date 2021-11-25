@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class LoginWindow : WindowBase
 {
     public InputField MnemonicInputField;
-    public Button GenerateNewMnemonicButton, LogInButton;
+    public Button GenerateNewMnemonicButton, LogInButton, RemovePlayerPrefsButton;
     public Text NewMnemonicWarningText;
 
     public Text MnemonicInputFieldPlaceholderText;
@@ -57,6 +57,13 @@ public class LoginWindow : WindowBase
                 await NFTWalletWindowManager.Instance.WalletWindow.ShowAsync();
             else
                 await NFTWalletWindowManager.Instance.PopupWindow.ShowPopupAsync("Can't initialize NFT wallet. Probably can't reach API server.", "INITIALIZATION ERROR");
+
+            await NFTWallet.Instance.AddKnownContractsIfMissingAsync();
+        });
+
+        RemovePlayerPrefsButton.onClick.AddListener(delegate
+        {
+            PlayerPrefs.DeleteAll();
         });
     }
 
