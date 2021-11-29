@@ -95,7 +95,10 @@ public class SendWindow : WindowBase
     {
         KeyValuePair<string, ICollection<long>> contractToIds = this.ownedNfts.OwnedIDsByContractAddress.FirstOrDefault(x => x.Key == selectedContract);
 
-        string idsString = contractToIds.Value.Any() ? string.Join(",", contractToIds.Value) : "You don't own any NFTs of that type.";
+        string idsString;
+        if (contractToIds.Value == null || !contractToIds.Value.Any())
+            idsString = "You don't own any NFTs of that type.";
+        else idsString = string.Join(",", contractToIds.Value);
 
         OwnedIdsText.text = idsString;
     }
