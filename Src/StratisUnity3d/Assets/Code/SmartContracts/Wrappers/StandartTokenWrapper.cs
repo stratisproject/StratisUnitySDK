@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Stratis.SmartContracts;
 using Stratis.SmartContracts.CLR.Serialization;
 using Unity3dApi;
 using UnityEngine;
@@ -7,14 +8,14 @@ using UnityEngine;
 public class StandartTokenWrapper
 {
     /// <summary>Deploys StandartToken contract and returns txid of deployment transaction.</summary>
-    public static async Task<string> DeployStandartTokenAsync(StratisUnityManager stratisUnityManager, ulong totalSupply, string name, string symbol, uint decimals)
+    public static async Task<string> DeployStandartTokenAsync(StratisUnityManager stratisUnityManager, UInt256 totalSupply, string name, string symbol, byte decimals)
     {
         List<string> constructorParameter = new List<string>()
         {
-            $"{(int)MethodParameterDataType.ULong}#{totalSupply}",
+            $"{(int)MethodParameterDataType.UInt256}#{totalSupply}",
             $"{(int)MethodParameterDataType.String}#{name}",
             $"{(int)MethodParameterDataType.String}#{symbol}",
-            $"{(int)MethodParameterDataType.UInt}#{decimals}"
+            $"{(int)MethodParameterDataType.Byte}#{decimals}"
         };
 
         string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0);
@@ -70,7 +71,7 @@ public class StandartTokenWrapper
 
     /// <summary>Provides token total supply.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<ulong> GetTotalSupplyAsync()
+    public async Task<UInt256> GetTotalSupplyAsync()
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -83,12 +84,12 @@ public class StandartTokenWrapper
             Parameters = new List<string>()
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
-        return ulong.Parse(localCallResult.Return.ToString());
+        return UInt256.Parse(localCallResult.Return.ToString());
     }
 
     /// <summary>Provides token balance of a given address.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<ulong> GetBalanceAsync(string address)
+    public async Task<UInt256> GetBalanceAsync(string address)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -101,12 +102,12 @@ public class StandartTokenWrapper
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{address}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
-        return ulong.Parse(localCallResult.Return.ToString());
+        return UInt256.Parse(localCallResult.Return.ToString());
     }
 
     /// <summary>Provides token decimals count.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<uint> GetDecimalsAsync()
+    public async Task<byte> GetDecimalsAsync()
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -119,12 +120,12 @@ public class StandartTokenWrapper
             Parameters = new List<string>()
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
-        return uint.Parse(localCallResult.Return.ToString());
+        return byte.Parse(localCallResult.Return.ToString());
     }
 
     /// <summary>Provides spending allowance.</summary>
     /// <remarks>Local call.</remarks>
-    public async Task<ulong> GetAllowanceAsync(string addressOwner, string addressSpender)
+    public async Task<UInt256> GetAllowanceAsync(string addressOwner, string addressSpender)
     {
         var localCallData = new LocalCallContractRequest()
         {
@@ -137,17 +138,17 @@ public class StandartTokenWrapper
             Parameters = new List<string>() { $"{(int)MethodParameterDataType.Address}#{addressOwner}", $"{(int)MethodParameterDataType.Address}#{addressSpender}" }
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
-        return ulong.Parse(localCallResult.Return.ToString());
+        return UInt256.Parse(localCallResult.Return.ToString());
     }
 
     /// <summary>Transfers specified amount of token to the given address.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> TransferToAsync(string address, ulong amount)
+    public async Task<string> TransferToAsync(string address, UInt256 amount)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{address}", 
-            $"{(int)MethodParameterDataType.ULong}#{amount}"
+            $"{(int)MethodParameterDataType.UInt256}#{amount}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferTo", parameters.ToArray());
@@ -155,13 +156,13 @@ public class StandartTokenWrapper
 
     /// <summary>Transfers specified amount of token to the given address from another given address.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> TransferFromAsync(string addressFrom, string addressTo, ulong amount)
+    public async Task<string> TransferFromAsync(string addressFrom, string addressTo, UInt256 amount)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{addressFrom}",
             $"{(int)MethodParameterDataType.Address}#{addressTo}",
-            $"{(int)MethodParameterDataType.ULong}#{amount}"
+            $"{(int)MethodParameterDataType.UInt256}#{amount}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferFrom", parameters.ToArray());
@@ -169,13 +170,13 @@ public class StandartTokenWrapper
 
     /// <summary>Sets allowance for the given address.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
-    public async Task<string> ApproveAsync(string spender, ulong currentAmount, ulong amount)
+    public async Task<string> ApproveAsync(string spender, UInt256 currentAmount, UInt256 amount)
     {
         List<string> parameters = new List<string>()
         {
             $"{(int)MethodParameterDataType.Address}#{spender}",
-            $"{(int)MethodParameterDataType.ULong}#{currentAmount}",
-            $"{(int)MethodParameterDataType.ULong}#{amount}"
+            $"{(int)MethodParameterDataType.UInt256}#{currentAmount}",
+            $"{(int)MethodParameterDataType.UInt256}#{amount}"
         };
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "Approve", parameters.ToArray());

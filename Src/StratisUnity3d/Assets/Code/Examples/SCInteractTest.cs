@@ -61,8 +61,8 @@ public class SCInteractTest : MonoBehaviour
         Debug.Log("Decimals: " + await stw.GetDecimalsAsync());
         Debug.Log("Allowance: " + await stw.GetAllowanceAsync(firstAddress, secondAddress));
 
-        ulong firstAddrBalance = await stw.GetBalanceAsync(firstAddress);
-        ulong secondAddrBalance = await stw.GetBalanceAsync(secondAddress);
+        UInt256 firstAddrBalance = await stw.GetBalanceAsync(firstAddress);
+        UInt256 secondAddrBalance = await stw.GetBalanceAsync(secondAddress);
 
         // Transfer 1 to 2nd address.
         var txId = await stw.TransferToAsync(secondAddress, 1);
@@ -71,8 +71,8 @@ public class SCInteractTest : MonoBehaviour
 
         Assert.IsTrue(bool.Parse(receipt.ReturnValue));
 
-        ulong firstAddrBalance2 = await stw.GetBalanceAsync(firstAddress);
-        ulong secondAddrBalance2 = await stw.GetBalanceAsync(secondAddress);
+        UInt256 firstAddrBalance2 = await stw.GetBalanceAsync(firstAddress);
+        UInt256 secondAddrBalance2 = await stw.GetBalanceAsync(secondAddress);
 
         Assert.IsTrue(firstAddrBalance - firstAddrBalance2 == 1);
         Assert.IsTrue(secondAddrBalance2 - secondAddrBalance == 1);
