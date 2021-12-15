@@ -57,7 +57,7 @@ For example here is how to deploy StandardToken contract:
             $"{(int)MethodParameterDataType.UInt}#8"
         };
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandardTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
 ```
 
@@ -75,7 +75,7 @@ to get smart contract address.
 
 
 
-Also there are wrappers for smart contracts that do constructor parameters encoding for you. You can check `StandartTokenWrapper` and `NFTWrapper`.  Here is StandartToken deployment example using a wrapper: 
+Also there are wrappers for smart contracts that do constructor parameters encoding for you. You can check `StandardTokenWrapper` and `NFTWrapper`.  Here is StandardToken deployment example using a wrapper: 
 
 ```
 await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", "TestNFT_{0}", false);
@@ -130,13 +130,13 @@ For more you can check examples in `TestSmartContracts.cs`
 
 ### Using smart contracts via wrappers
 
-NFT and StandartToken contracts have wrappers to make it easier to interact with them. Wrapper is a class that constructs call parameters and makes a call. 
+NFT and StandardToken contracts have wrappers to make it easier to interact with them. Wrapper is a class that constructs call parameters and makes a call. 
 
-Here is an example for standart token wrapper that displays information about target standart token: 
+Here is an example for standard token wrapper that displays information about target standard token: 
 
 ```
-string standartTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
-StandartTokenWrapper stw = new StandartTokenWrapper(stratisUnityManager, standartTokenAddr);
+string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+StandardTokenWrapper stw = new StandardTokenWrapper(stratisUnityManager, standardTokenAddr);
 
 Debug.Log("Symbol: " + await stw.GetSymbolAsync());
 Debug.Log("Name: " + await stw.GetNameAsync());
@@ -179,7 +179,7 @@ You can find full listings for smart contract examples in the Examples folder.
 
 `\Assets\Code\Examples\TestSmartContracts.cs` - general example that covers contract deployment and interaction. 
 
-`\Assets\Code\Examples\SCInteractTest.cs` - example that covers NFT and StandartToken contracts deployment and interaction. 
+`\Assets\Code\Examples\SCInteractTest.cs` - example that covers NFT and StandardToken contracts deployment and interaction. 
 
 
 

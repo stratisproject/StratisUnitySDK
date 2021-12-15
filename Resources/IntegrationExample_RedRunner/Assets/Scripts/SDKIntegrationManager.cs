@@ -52,7 +52,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private Unity3dClient client;
 
-    private StandartTokenWrapper tokenRRT;
+    private StandardTokenWrapper tokenRRT;
 
     private NFTWrapper nftKite;
 
@@ -89,7 +89,7 @@ public class SDKIntegrationManager : MonoBehaviour
         Mnemonic m = new Mnemonic(mnemonic, Wordlist.English);
         stratisUnityManager = new StratisUnityManager(client, network, m);
 
-        this.tokenRRT = new StandartTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
+        this.tokenRRT = new StandardTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
         this.nftKite = new NFTWrapper(stratisUnityManager, RedRunnerNFTContractAddress);
         this.nftChest = new NFTWrapper(stratisUnityManager, RedRunnerNFTChestContractAddress);
 
