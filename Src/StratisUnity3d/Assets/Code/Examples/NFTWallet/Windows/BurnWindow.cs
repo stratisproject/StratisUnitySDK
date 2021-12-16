@@ -107,8 +107,9 @@ public class BurnWindow : WindowBase
     {
         KeyValuePair<string, ICollection<long>> contractToIds = this.ownedNfts.OwnedIDsByContractAddress.FirstOrDefault(x => x.Key == selectedContract);
 
-        string idsString = contractToIds.Value.Any() ? string.Join(",", contractToIds.Value) : "You don't own any NFTs of that type.";
-
-        OwnedIdsText.text = idsString;
+        if (contractToIds.Value == null || !contractToIds.Value.Any())
+            OwnedIdsText.text = "You don't own any NFTs of that type.";
+        else
+            OwnedIdsText.text = string.Join(",", contractToIds.Value);
     }
 }

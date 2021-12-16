@@ -17,6 +17,8 @@ public class NFTWalletWindowManager : MonoBehaviour
     public BurnWindow BurnWindow;
     public WaitTransactionWindow WaitTransactionWindow;
 
+    public bool IsMobile;
+
     private List<WindowBase> allWindows;
     
     void Awake()
