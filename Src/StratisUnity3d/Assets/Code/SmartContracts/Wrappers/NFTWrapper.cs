@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class NFTWrapper
 {
-    /// <summary>Deploys StandartToken contract and returns txid of deployment transaction.</summary>
+    /// <summary>Deploys NFT contract and returns txid of deployment transaction.</summary>
     public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol, bool ownerOnlyMinting)
     {
         List<string> constructorParameter = new List<string>()
@@ -241,7 +241,7 @@ public class NFTWrapper
 
         return await this.stratisUnityManager.SendCallContractTransactionAsync(this.contractAddress, "TransferFrom", parameters.ToArray());
     }
-    
+
     /// <summary>Set or reaffirm the approved address for an NFT. This function can be changed to payable.</summary>
     /// <remarks>Normal call. Use returned txId to get receipt in order to get return value once transaction is mined. Return value is of <c>bool</c> type.</remarks>
     public async Task<string> ApproveAsync(string addr, UInt256 tokenId)

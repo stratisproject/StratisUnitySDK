@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 using Network = NBitcoin.Network;
 
 /// <summary>
-/// This example tests wrappers for StandartToken and NFT contracts.
+/// This example tests wrappers for StandardToken and NFT contracts.
 /// </summary>
 public class SCInteractTest : MonoBehaviour
 {
@@ -38,21 +38,21 @@ public class SCInteractTest : MonoBehaviour
 
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
 
-        // StandartTokenWrapper test.
-        //await this.StandartTokenWrapperTestAsync().ConfigureAwait(false);
+        // StandardTokenWrapper test.
+        //await this.StandardTokenWrapperTestAsync().ConfigureAwait(false);
 
         // NFT wrapper test.
         await this.NFTWrapperTestAsync().ConfigureAwait(false);
     }
 
-    private async Task StandartTokenWrapperTestAsync()
+    private async Task StandardTokenWrapperTestAsync()
     {
-        // If you want to deploy new instance of standart token contract use: StandartTokenWrapper.DeployStandartTokenAsync
+        // If you want to deploy new instance of standard token contract use: StandardTokenWrapper.DeployStandardTokenAsync
         // For this example we will be using already deployed contract.
-        Debug.Log("Testing StandartTokenWrapper.");
+        Debug.Log("Testing StandardTokenWrapper.");
 
-        string standartTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
-        StandartTokenWrapper stw = new StandartTokenWrapper(stratisUnityManager, standartTokenAddr);
+        string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+        StandardTokenWrapper stw = new StandardTokenWrapper(stratisUnityManager, standardTokenAddr);
 
         Debug.Log("Symbol: " + await stw.GetSymbolAsync());
         Debug.Log("Name: " + await stw.GetNameAsync());
@@ -77,12 +77,12 @@ public class SCInteractTest : MonoBehaviour
         Assert.IsTrue(firstAddrBalance - firstAddrBalance2 == 1);
         Assert.IsTrue(secondAddrBalance2 - secondAddrBalance == 1);
 
-        Debug.Log("StandartTokenWrapper test successful.");
+        Debug.Log("StandardTokenWrapper test successful.");
     }
 
     private async Task NFTWrapperTestAsync()
     {
-        // If you want to deploy new instance of standart token contract use: NFTWrapper.DeployNFTContractAsync
+        // If you want to deploy new instance of standard token contract use: NFTWrapper.DeployNFTContractAsync
         // For this example we will be using already deployed contract.
 
         // Contract deployment:
@@ -100,14 +100,14 @@ public class SCInteractTest : MonoBehaviour
         string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
 
         await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
-        
+
         ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 
         Assert.IsTrue(balanceAfter == balanceBefore + 1);
 
         Assert.AreEqual("TestNFT", await nft.NameAsync().ConfigureAwait(false));
         Assert.AreEqual("TNFT", await nft.SymbolAsync().ConfigureAwait(false));
-        
+
         Debug.Log("NFT test successful.");
     }
 }
