@@ -5,7 +5,7 @@ using Stratis.SmartContracts.CLR.Serialization;
 using Unity3dApi;
 using UnityEngine;
 
-public class StandardTokenWrapper
+public class StandartTokenWrapper
 {
     /// <summary>Deploys StandardToken contract and returns txid of deployment transaction.</summary>
     public static async Task<string> DeployStandardTokenAsync(StratisUnityManager stratisUnityManager, UInt256 totalSupply, string name, string symbol, byte decimals)
@@ -18,7 +18,7 @@ public class StandardTokenWrapper
             $"{(int)MethodParameterDataType.Byte}#{decimals}"
         };
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandardTokenContract.ByteCode, constructorParameter.ToArray(), 0);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
 
         return txId;
@@ -27,7 +27,7 @@ public class StandardTokenWrapper
     private readonly StratisUnityManager stratisUnityManager;
     private readonly string contractAddress;
 
-    public StandardTokenWrapper(StratisUnityManager stratisUnityManager, string contractAddress)
+    public StandartTokenWrapper(StratisUnityManager stratisUnityManager, string contractAddress)
     {
         this.stratisUnityManager = stratisUnityManager;
         this.contractAddress = contractAddress;

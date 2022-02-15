@@ -38,7 +38,7 @@ public class SCInteractTest : MonoBehaviour
 
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
 
-        // StandardTokenWrapper test.
+        // StandartTokenWrapper test.
         //await this.StandardTokenWrapperTestAsync();
 
         // NFT wrapper test.
@@ -47,12 +47,12 @@ public class SCInteractTest : MonoBehaviour
 
     private async Task StandardTokenWrapperTestAsync()
     {
-        // If you want to deploy new instance of standard token contract use: StandardTokenWrapper.DeployStandardTokenAsync
+        // If you want to deploy new instance of standard token contract use: StandartTokenWrapper.DeployStandardTokenAsync
         // For this example we will be using already deployed contract.
-        Debug.Log("Testing StandardTokenWrapper.");
+        Debug.Log("Testing StandartTokenWrapper.");
 
         string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
-        StandardTokenWrapper stw = new StandardTokenWrapper(stratisUnityManager, standardTokenAddr);
+        StandartTokenWrapper stw = new StandartTokenWrapper(stratisUnityManager, standardTokenAddr);
 
         Debug.Log("Symbol: " + await stw.GetSymbolAsync());
         Debug.Log("Name: " + await stw.GetNameAsync());
@@ -77,7 +77,7 @@ public class SCInteractTest : MonoBehaviour
         Assert.IsTrue(firstAddrBalance - firstAddrBalance2 == 1);
         Assert.IsTrue(secondAddrBalance2 - secondAddrBalance == 1);
 
-        Debug.Log("StandardTokenWrapper test successful.");
+        Debug.Log("StandartTokenWrapper test successful.");
     }
 
     private async Task NFTWrapperTestAsync()
