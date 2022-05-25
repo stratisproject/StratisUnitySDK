@@ -51,7 +51,7 @@ public class NFTExample : MonoBehaviour
         ICollection<string> watchedContracts = await client.GetWatchedNFTContractsAsync();
         string watchedContractsString = String.Join(",", watchedContracts);
         Debug.Log("Watched contracts: " + watchedContractsString);
-        
+
         UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress);
         UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress);
 
@@ -77,7 +77,8 @@ public class NFTExample : MonoBehaviour
         string nftName = "gameSword";
         string nftSymbol = "GS";
 
-        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false);
+        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false,
+            this.stratisUnityManager.GetAddress().ToString(), 0);
 
         ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
@@ -90,7 +91,7 @@ public class NFTExample : MonoBehaviour
         sb.AppendLine("[NFT transfers]");
 
         List<ReceiptResponse> transferReceipts = (await client.ReceiptSearchAsync(nftAddress, "TransferLog", null, 2300000, null).ConfigureAwait(false)).ToList();
-        
+
         foreach (ReceiptResponse receiptRes in transferReceipts)
         {
             string log = receiptRes.Logs.First().Log.ToString();

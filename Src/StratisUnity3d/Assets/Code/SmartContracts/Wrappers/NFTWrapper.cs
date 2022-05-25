@@ -9,14 +9,19 @@ using UnityEngine;
 
 public class NFTWrapper
 {
-    /// <summary>Deploys NFT contract and returns txid of deployment transaction.</summary>
-    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol, bool ownerOnlyMinting)
+    /// <summary>Deploys StandartToken contract and returns txid of deployment transaction.</summary>
+    public static async Task<string> DeployNFTContractAsync(StratisUnityManager stratisUnityManager, string name, string symbol,
+        bool ownerOnlyMinting, string royaltyRecipient, double royaltyPercent)
     {
+        uint royaltyPercentInt = (uint) (royaltyPercent * 100);
+
         List<string> constructorParameter = new List<string>()
         {
             $"{(int)MethodParameterDataType.String}#{name}",
             $"{(int)MethodParameterDataType.String}#{symbol}",
-            $"{(int)MethodParameterDataType.Bool}#{ownerOnlyMinting}"
+            $"{(int)MethodParameterDataType.Bool}#{ownerOnlyMinting}",
+            $"{(int)MethodParameterDataType.Address}#{royaltyRecipient}",
+            $"{(int)MethodParameterDataType.UInt}#{royaltyPercentInt}"
         };
 
         string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0);
@@ -86,6 +91,40 @@ public class NFTWrapper
         };
         LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
         return localCallResult.Return.ToString();
+    }
+
+    /// <summary>Royalty Info.</summary>
+    /// <remarks>Local call.</remarks>
+    public async Task<RoyaltyInfo> RoyaltyInfoAsync(ulong salePrice)
+    {
+        var localCallData = new LocalCallContractRequest()
+        {
+            GasPrice = 10000,
+            Amount = "0",
+            GasLimit = 250000,
+            ContractAddress = this.contractAddress,
+            MethodName = "RoyaltyInfo",
+            Sender = stratisUnityManager.GetAddress().ToString(),
+            Parameters = new List<string>()
+            {
+                $"{(int)MethodParameterDataType.UInt256}#{0}",
+                $"{(int)MethodParameterDataType.ULong}#{salePrice}"
+            }
+        };
+        LocalExecutionResult localCallResult = await this.stratisUnityManager.Client.LocalCallAsync(localCallData);
+
+        List<object> result = JsonConvert.DeserializeObject<List<object>>(localCallResult.Return.ToString());
+
+        string royaltyAddr = result[0].ToString();
+        ulong royaltyAmount = ulong.Parse(result[1].ToString());
+
+        RoyaltyInfo info = new RoyaltyInfo()
+        {
+            RecipientAddress = royaltyAddr,
+            RoyaltyAmount = royaltyAmount
+        };
+
+        return info;
     }
 
     /// <summary>True if provided interface is supported.</summary>
@@ -335,4 +374,11 @@ public partial class TransferLogEvent
 
     [JsonProperty("tokenId")]
     public UInt256 TokenId { get; set; }
+}
+
+public class RoyaltyInfo
+{
+    public string RecipientAddress { get; set; }
+
+    public ulong RoyaltyAmount { get; set; }
 }
