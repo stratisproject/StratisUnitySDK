@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
 using Stratis.SmartContracts.CLR.Serialization;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
 
@@ -16,11 +16,10 @@ public class TestSmartContracts : MonoBehaviour
         Network network = new CirrusMain();
 
         // API Client used to interact with a node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
-        //Unity3dClient Client = new Unity3dClient("http://localhost:44336/");
-        Unity3dClient client = new Unity3dClient("https://cirrusapi.stratisplatform.com/");
+        StratisNodeClient client = new StratisNodeClient("https://cirrus-api-ha.stratisplatform.com");
         
         Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);
-        StratisUnityManager stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+        StratisUnityManager stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://crs.indexer.thedude.pro/api/"), network, mnemonic);
 
         Debug.Log("Your address: " + stratisUnityManager.GetAddress());
 

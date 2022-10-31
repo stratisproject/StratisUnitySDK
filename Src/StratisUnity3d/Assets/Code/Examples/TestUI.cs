@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Bitcoin.Networks;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,7 +26,7 @@ public class TestUI : MonoBehaviour
 
     void Start()
     {
-        this.ApiUrl_InputField.text = "http://localhost:44336/";
+        this.ApiUrl_InputField.text = "https://cirrus-api-ha.stratisplatform.com";
         this.Mnemonic_InputField.text = "leopard fire legal door attract stove similar response photo prize seminar frown";
 
         PopupPanel.SetActive(false);
@@ -44,7 +44,7 @@ public class TestUI : MonoBehaviour
     
     private IEnumerator TestApi_ButtonCall()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl_InputField.text);
+        StratisNodeClient client = new StratisNodeClient(ApiUrl_InputField.text);
 
         string resultString = "";
 
@@ -52,7 +52,7 @@ public class TestUI : MonoBehaviour
         {
             try
             {
-                await client.TipAsync();
+                await client.ReceiptAsync("e3270de09010dc9fb19b43fd5c04d667742b771b73743f5cae146a2841f7965e");
             }
             catch (Exception e)
             {
@@ -79,7 +79,7 @@ public class TestUI : MonoBehaviour
     {
         try
         {
-            this.stratisUnityManager = new StratisUnityManager(new Unity3dClient(ApiUrl_InputField.text), new StraxMain(), new Mnemonic(this.Mnemonic_InputField.text, Wordlist.English));
+            this.stratisUnityManager = new StratisUnityManager(new StratisNodeClient(ApiUrl_InputField.text), new BlockCoreApi("https://crs.indexer.thedude.pro/api/"), new StraxMain(), new Mnemonic(this.Mnemonic_InputField.text, Wordlist.English));
 
             this.DisplayPopup("StratisUnityManager initialized.");
 

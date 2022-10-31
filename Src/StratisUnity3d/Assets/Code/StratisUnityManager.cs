@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,13 +8,13 @@ using Stratis.SmartContracts.CLR;
 using Stratis.SmartContracts.CLR.Serialization;
 using Stratis.SmartContracts.Core;
 using Stratis.SmartContracts.RuntimeObserver;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
 
 public class StratisUnityManager
 {
-    public readonly Unity3dClient Client;
+    public readonly StratisNodeClient Client;
 
     private Network network;
 
@@ -36,13 +37,16 @@ public class StratisUnityManager
 
     private CallDataSerializer callDataSerializer;
 
-    public StratisUnityManager(Unity3dClient client, Network network, Mnemonic mnemonic)
+    private BlockCoreApi blockcoreApi;
+
+    public StratisUnityManager(StratisNodeClient client, BlockCoreApi blockcoreApi, Network network, Mnemonic mnemonic, string passPhrase = null)
     {
         this.Client = client;
         this.network = network;
         this.mnemonic = mnemonic;
+        this.blockcoreApi = blockcoreApi;
 
-        ExtKey extKey = this.mnemonic.DeriveExtKey();
+        ExtKey extKey = this.mnemonic.DeriveExtKey(passPhrase);
 
         // cirrus main m/44'/401'/0'/0/0
         // cirrus test m/44'/400'/0'/0/0
@@ -58,18 +62,18 @@ public class StratisUnityManager
 
     public async Task<decimal> GetBalanceAsync()
     {
-        long balanceSat = await Client.GetAddressBalanceAsync(this.address.ToString());
+        ulong balanceSat = await this.blockcoreApi.GetBalanceAsync(this.address.ToString());
 
         decimal balance = new Money(balanceSat).ToUnit(MoneyUnit.BTC);
 
         return balance;
     }
-    
+
     public string SignMessage(string message)
     {
         return this.privateKey.SignMessage(message);
     }
-    
+
     public BitcoinPubKeyAddress GetAddress()
     {
         return this.address;
@@ -80,7 +84,7 @@ public class StratisUnityManager
         Coin[] coins = await this.GetCoinsAsync();
 
         BitcoinPubKeyAddress addrTo = new BitcoinPubKeyAddress(destinationAddress, this.network);
-    
+
         var txBuilder = new TransactionBuilder(this.network);
         Transaction tx = txBuilder
             .AddCoins(coins)
@@ -89,13 +93,13 @@ public class StratisUnityManager
             .SendFees(DefaultFee * coins.Length)
             .SetChange(this.address)
             .BuildTransaction(true);
-    
+
         if (!txBuilder.Verify(tx))
             Debug.LogError("Tx wasn't fully signed!");
 
         Debug.Log(string.Format("Created tx {0} to {1}, amount: {2}. HEX: {3}", tx.GetHash(), destinationAddress, sendAmount, tx.ToHex()));
 
-        await Client.SendTransactionAsync(new SendTransactionRequest() {Hex = tx.ToHex()});
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() });
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -136,9 +140,9 @@ public class StratisUnityManager
 
     private async Task<Coin[]> GetCoinsAsync()
     {
-        GetUTXOsResponseModel utxos = await Client.GetUTXOsForAddressAsync(this.address.ToString());
+        List<BlockCoreApi.UTXOModel> utxos = await this.blockcoreApi.GetUTXOsAsync(this.address.ToString());
 
-        Coin[] coins = utxos.Utxos.Select(x => new Coin(new OutPoint(uint256.Parse(x.Hash), x.N), new TxOut(new Money(x.Satoshis), address))).ToArray();
+        Coin[] coins = utxos.Select(x => new Coin(new OutPoint(uint256.Parse(x.Hash), x.N), new TxOut(new Money(x.Satoshis), address))).ToArray();
 
         return coins;
     }
@@ -179,8 +183,10 @@ public class StratisUnityManager
             .SendFees(totalFee)
             .SetChange(this.address)
             .BuildTransaction(true);
-        
-        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() });
+
+        string hex = tx.ToHex();
+
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = hex });
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();

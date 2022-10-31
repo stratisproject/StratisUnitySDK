@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
 using Stratis.SmartContracts;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Network = NBitcoin.Network;
@@ -12,7 +12,9 @@ using Network = NBitcoin.Network;
 /// </summary>
 public class SCInteractTest : MonoBehaviour
 {
-    public string ApiUrl = "http://localhost:44336/";
+    public string NodeApiUrl = "https://cirrus-api-ha.stratisplatform.com";
+
+    public string BlockCoreApiUrl = "https://crs.indexer.thedude.pro/api/";
 
     private readonly string firstAddrMnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
@@ -26,10 +28,10 @@ public class SCInteractTest : MonoBehaviour
 
     async void Start()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl);
+        StratisNodeClient client = new StratisNodeClient(NodeApiUrl);
 
         Mnemonic mnemonic = new Mnemonic(firstAddrMnemonic, Wordlist.English);
-        stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+        stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi(BlockCoreApiUrl), network, mnemonic);
         firstAddress = stratisUnityManager.GetAddress().ToString();
         Debug.Log("Your address: " + firstAddress);
 
