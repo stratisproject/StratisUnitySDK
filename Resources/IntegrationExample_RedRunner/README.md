@@ -42,7 +42,7 @@ You can get access to Red Runner source code by using one of the following ways:
 git clone https://github.com/BayatGames/RedRunner.git
 ```
 
-Also you can the build version of the Red Runner using the following ways:
+Also you can get the build version of the Red Runner using the following way:
 
 - [:star: Download from Itch.io](https://bayat.itch.io/red-runner)
 
