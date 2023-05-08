@@ -65,7 +65,7 @@ For example here is how to deploy StandardToken contract:
 
 
 
-And once transaction is confirmed, you can use below line of sample codes to get smart contract address. 
+And once transaction is confirmed, you can use below sample code to get smart contract address. 
 
 ```
 ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a3647954b0476d75173d91d0c8db0267c4894d1f6").ConfigureAwait(false);
