@@ -12,8 +12,8 @@ In this tutorial I'll explain how to start using NFTs with StratisUnity3dSDK.
 
 3. Generate new address and fund it with some TCRS. You will need coins in order to deploy and interact with NFTs. 
 
-   ```c#
- Network network = new CirrusTest();
+```c#
+Network network = new CirrusTest();
 
 StratisNodeClient client = new StratisNodeClient("http://localhost:38223/");
 
@@ -22,7 +22,8 @@ Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar 
 StratisUnityManager stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://tcrs.indexer.blockcore.net/api/"), network, mnemonic);
 
 Debug.Log("Your address: " + stratisUnityManager.GetAddress());
-   ```
+
+```
 
     
 
@@ -39,6 +40,7 @@ string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, 
 ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
 Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
+
 ```
 
 
@@ -56,6 +58,7 @@ NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftContractAddress);
 
 await nft.MintAsync(firstAddress, uri).ConfigureAwait(false);
 Debug.Log("NFT minted successfully!");
+
 ```
 
 
@@ -65,10 +68,12 @@ Debug.Log("NFT minted successfully!");
 NFT balance of address is the amount of NFTs that this address controls. You can get it like this:
 
 ```
+
 NFTWrapper nft = new NFTWrapper(stratisUnityManager, "t8snCz4kQgovGTAGReAryt863NwEYqjJqy");
 
 ulong balance = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 Debug.Log("NFT balance: " + balance);
+
 ```
 
 
