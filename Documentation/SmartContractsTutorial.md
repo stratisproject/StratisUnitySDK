@@ -12,7 +12,7 @@ You can also check if smart contract is whitelisted using `/api/Voting/whitelist
 
 First you need to get a full node and sync it. Full node repository can be found here: https://github.com/stratisproject/StratisBitcoinFullNode
 
-To run it you can just go to `\src\Stratis.CirrusD` and run `dotnet run -txindex=1 -addressindex=1 -testnet -unityapi_enable=true` using cmd or powershell. If you want to run on Cirrus Main use same command line arguments but without `-testnet`.
+To run it you can just go to `\src\Stratis.CirrusD` and run `dotnet run -testnet` using cmd or powershell. If you want to run on Cirrus Main use same command line arguments but without `-testnet`.
 
 
 
@@ -24,18 +24,20 @@ Secondly you need to import StratisUnitySDK. Latest version can be found here: h
 
 ### Deploying smart contracts
 
-When you deploy smart contracts you are creating a transaction which requires fee. So before you proceed make sure you have some STRAX or TSTRAX (STRAX on testnet) deposited to your address.
+When you deploy smart contracts you are creating a transaction which requires fee. So before you proceed make sure you have some CRS or TCRS (CRS on testnet) deposited to your address.
 
 
 
 Following code generates your address and then displays it in the debug console.
 
 ```c#
-Unity3dClient Client = new Unity3dClient("http://localhost:44336/");
+Network network = new CirrusTest();
+
+StratisNodeClient client = new StratisNodeClient("http://localhost:38223/");
 
 Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);
 
-StratisUnityManager stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+StratisUnityManager stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://tcrs.indexer.blockcore.net/api/"), network, mnemonic);
 
 Debug.Log("Your address: " + stratisUnityManager.GetAddress());
 ```
@@ -63,7 +65,7 @@ For example here is how to deploy StandardToken contract:
 
 
 
-And once transaction is confirmed you can use 
+And once transaction is confirmed, you can use below sample code to get smart contract address. 
 
 ```
 ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a3647954b0476d75173d91d0c8db0267c4894d1f6").ConfigureAwait(false);
@@ -71,7 +73,6 @@ ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a364
 string contractAddr = receipt.NewContractAddress;
 ```
 
-to get smart contract address. 
 
 
 

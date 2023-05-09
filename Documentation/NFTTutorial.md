@@ -6,21 +6,24 @@ In this tutorial I'll explain how to start using NFTs with StratisUnity3dSDK.
 
 ### Prerequisites
 
-1. First you need to get a full node and sync it. Full node repository can be found here: https://github.com/stratisproject/StratisBitcoinFullNode. To run it you can just go to `\src\Stratis.CirrusD` and run `dotnet run -txindex=1 -addressindex=1 -testnet -unityapi_enable=true` using cmd or powershell. If you want to run on Cirrus Main use same command line arguments but without `-testnet`.
+1. First you need to get a full node and sync it. Full node repository can be found here: https://github.com/stratisproject/StratisBitcoinFullNode. To run it you can just go to `\src\Stratis.CirrusD` and run `dotnet run -testnet` using cmd or powershell. If you want to run on Cirrus Main use same command line arguments but without `-testnet`.
 
 2. Create a new unity project and import StratisUnitySDK. Latest version can be found here: https://github.com/stratisproject/Unity3dIntegration/tree/main/Resources
 
-3. Generate new address and fund it with some TSTRAX. You will need coins in order to deploy and interact with NFTs. 
+3. Generate new address and fund it with some TCRS. You will need coins in order to deploy and interact with NFTs. 
 
-   ```c#
-   Unity3dClient Client = new Unity3dClient("http://localhost:44336/");
-   
-   Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);
-   
-   StratisUnityManager stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
-   
-   Debug.Log("Your address: " + stratisUnityManager.GetAddress());
-   ```
+```c#
+Network network = new CirrusTest();
+
+StratisNodeClient client = new StratisNodeClient("http://localhost:38223/");
+
+Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);
+
+StratisUnityManager stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://tcrs.indexer.blockcore.net/api/"), network, mnemonic);
+
+Debug.Log("Your address: " + stratisUnityManager.GetAddress());
+
+```
 
     
 
@@ -32,11 +35,12 @@ Choose name and symbol for your NFT and call `NFTWrapper.DeployNFTContractAsync`
 string nftName = "gameSword";
 string nftSymbol = "GS";
 
-string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, nftName + "_{0}", false);
+string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false, this.stratisUnityManager.GetAddress().ToString(), 0);
 
-ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
 Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
+
 ```
 
 
@@ -46,9 +50,15 @@ Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
 Calling `MintAsync` with specified target owner address will result in minting a new NFT that will belong to that address. For example: 
 
 ```
-NFTWrapper nft = new NFTWrapper(stratisUnityManager, "t8snCz4kQgovGTAGReAryt863NwEYqjJqy");
+string firstAddress = "t8ehx5Nm4QXeRhzt92ATTgCRc1zDkFXAdw";
+string uri = "https://rijsat.com/wp-content/nftcollction/demonft.png";
+string nftContractAddress = "tRxYDrnKGAKcrSrc1VQMoKa28RSGUXywP5";
 
-await nft.MintAsync(firstAddress).ConfigureAwait(false);
+NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftContractAddress);        
+
+await nft.MintAsync(firstAddress, uri).ConfigureAwait(false);
+Debug.Log("NFT minted successfully!");
+
 ```
 
 
@@ -58,10 +68,12 @@ await nft.MintAsync(firstAddress).ConfigureAwait(false);
 NFT balance of address is the amount of NFTs that this address controls. You can get it like this:
 
 ```
+
 NFTWrapper nft = new NFTWrapper(stratisUnityManager, "t8snCz4kQgovGTAGReAryt863NwEYqjJqy");
 
 ulong balance = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
 Debug.Log("NFT balance: " + balance);
+
 ```
 
 
