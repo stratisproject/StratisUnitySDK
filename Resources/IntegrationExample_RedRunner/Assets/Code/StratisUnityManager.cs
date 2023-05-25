@@ -1,20 +1,20 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NBitcoin;
-using Stratis.Bitcoin.Features.Wallet;
 using Stratis.SmartContracts.CLR;
 using Stratis.SmartContracts.CLR.Serialization;
 using Stratis.SmartContracts.Core;
 using Stratis.SmartContracts.RuntimeObserver;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using Network = NBitcoin.Network;
 
 public class StratisUnityManager
 {
-    public readonly Unity3dClient Client;
+    public readonly StratisNodeClient Client;
 
     private Network network;
 
@@ -37,13 +37,22 @@ public class StratisUnityManager
 
     private CallDataSerializer callDataSerializer;
 
-    public StratisUnityManager(Unity3dClient client, Network network, Mnemonic mnemonic)
+    private BlockCoreApi blockcoreApi;
+
+    public StratisUnityManager(StratisNodeClient client, BlockCoreApi blockcoreApi, Network network, Mnemonic mnemonic, string passPhrase = null)
     {
         this.Client = client;
         this.network = network;
         this.mnemonic = mnemonic;
+        this.blockcoreApi = blockcoreApi;
 
-        this.privateKey = this.mnemonic.DeriveExtKey().PrivateKey;
+        ExtKey extKey = this.mnemonic.DeriveExtKey(passPhrase);
+
+        // cirrus main m/44'/401'/0'/0/0
+        // cirrus test m/44'/400'/0'/0/0
+        ExtKey derived = extKey.Derive(new KeyPath($"m/44'/" + network.Consensus.CoinType + "'/0'/0/0"));
+
+        this.privateKey = derived.PrivateKey;
         this.publicKey = this.privateKey.PubKey;
         this.address = this.publicKey.GetAddress(network);
 
@@ -53,11 +62,16 @@ public class StratisUnityManager
 
     public async Task<decimal> GetBalanceAsync()
     {
-        long balanceSat = await Client.GetAddressBalanceAsync(this.address.ToString()).ConfigureAwait(false);
+        ulong balanceSat = await this.blockcoreApi.GetBalanceAsync(this.address.ToString());
 
         decimal balance = new Money(balanceSat).ToUnit(MoneyUnit.BTC);
 
         return balance;
+    }
+
+    public string SignMessage(string message)
+    {
+        return this.privateKey.SignMessage(message);
     }
 
     public BitcoinPubKeyAddress GetAddress()
@@ -67,25 +81,25 @@ public class StratisUnityManager
 
     public async Task<string> SendTransactionAsync(string destinationAddress, Money sendAmount)
     {
-        Coin[] coins = await this.GetCoinsAsync().ConfigureAwait(false);
+        Coin[] coins = await this.GetCoinsAsync();
 
         BitcoinPubKeyAddress addrTo = new BitcoinPubKeyAddress(destinationAddress, this.network);
-    
+
         var txBuilder = new TransactionBuilder(this.network);
         Transaction tx = txBuilder
             .AddCoins(coins)
             .AddKeys(this.privateKey)
             .Send(addrTo, sendAmount)
-            .SendFees(DefaultFee)
+            .SendFees(DefaultFee * coins.Length)
             .SetChange(this.address)
             .BuildTransaction(true);
-    
+
         if (!txBuilder.Verify(tx))
             Debug.LogError("Tx wasn't fully signed!");
 
-        Debug.Log(string.Format("Created tx {0} to {1}, amount: {2}.", tx.GetHash(), destinationAddress, sendAmount));
+        Debug.Log(string.Format("Created tx {0} to {1}, amount: {2}. HEX: {3}", tx.GetHash(), destinationAddress, sendAmount, tx.ToHex()));
 
-        await Client.SendTransactionAsync(new SendTransactionRequest() {Hex = tx.ToHex()}).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() });
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -95,12 +109,12 @@ public class StratisUnityManager
     {
         byte[] bytes = Encoding.UTF8.GetBytes(opReturnData);
 
-        return await this.SendOpReturnTransactionAsync(bytes).ConfigureAwait(false);
+        return await this.SendOpReturnTransactionAsync(bytes);
     }
 
     public async Task<string> SendOpReturnTransactionAsync(byte[] bytes)
     {
-        Coin[] coins = await this.GetCoinsAsync().ConfigureAwait(false);
+        Coin[] coins = await this.GetCoinsAsync();
 
         Script opReturnScript = TxNullDataTemplate.Instance.GenerateScriptPubKey(bytes);
 
@@ -118,7 +132,7 @@ public class StratisUnityManager
 
         Debug.Log(string.Format("Created OP_RETURN tx {0}, data: {1}.", tx.GetHash(), Encoding.UTF8.GetString(bytes)));
 
-        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() });
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -126,9 +140,9 @@ public class StratisUnityManager
 
     private async Task<Coin[]> GetCoinsAsync()
     {
-        GetUTXOsResponseModel utxos = await Client.GetUTXOsForAddressAsync(this.address.ToString()).ConfigureAwait(false);
+        List<BlockCoreApi.UTXOModel> utxos = await this.blockcoreApi.GetUTXOsAsync(this.address.ToString());
 
-        Coin[] coins = utxos.Utxos.Select(x => new Coin(new OutPoint(uint256.Parse(x.Hash), x.N), new TxOut(new Money(x.Satoshis), address))).ToArray();
+        Coin[] coins = utxos.Select(x => new Coin(new OutPoint(uint256.Parse(x.Hash), x.N), new TxOut(new Money(x.Satoshis), address))).ToArray();
 
         return coins;
     }
@@ -142,7 +156,7 @@ public class StratisUnityManager
     /// <a target="_blank" href="https://academy.stratisplatform.com/SmartContracts/working-with-contracts.html#parameter-serialization">here</a>.</param>
     public async Task<string> SendCreateContractTransactionAsync(string contractCode, string[] parameters = null, Money amount = null)
     {
-        Coin[] coins = await this.GetCoinsAsync().ConfigureAwait(false);
+        Coin[] coins = await this.GetCoinsAsync();
 
         ContractTxData txData;
         if (parameters != null && parameters.Any())
@@ -169,8 +183,10 @@ public class StratisUnityManager
             .SendFees(totalFee)
             .SetChange(this.address)
             .BuildTransaction(true);
-        
-        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+
+        string hex = tx.ToHex();
+
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = hex });
 
         Debug.Log("Transaction sent.");
         return tx.GetHash().ToString();
@@ -186,7 +202,7 @@ public class StratisUnityManager
     /// <returns></returns>
     public async Task<string> SendCallContractTransactionAsync(string contractAddr, string methodName, string[] parameters = null, Money amount = null)
     {
-        Coin[] coins = await this.GetCoinsAsync().ConfigureAwait(false);
+        Coin[] coins = await this.GetCoinsAsync();
 
         uint160 addressNumeric = contractAddr.ToUint160(this.network);
 
@@ -211,7 +227,8 @@ public class StratisUnityManager
             .SendFees(totalFee)
             .SetChange(this.address)
             .BuildTransaction(true);
-        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() }).ConfigureAwait(false);
+
+        await Client.SendTransactionAsync(new SendTransactionRequest() { Hex = tx.ToHex() });
 
         Debug.Log("SC call transaction sent. Id: " + tx.GetHash().ToString());
         return tx.GetHash().ToString();
@@ -221,13 +238,13 @@ public class StratisUnityManager
     {
         while (true)
         {
-            ReceiptResponse result = await this.Client.ReceiptAsync(txId).ConfigureAwait(false);
+            ReceiptResponse result = await this.Client.ReceiptAsync(txId);
 
             if (result != null)
                 return result;
 
             Debug.Log("Waiting for receipt...");
-            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
 }

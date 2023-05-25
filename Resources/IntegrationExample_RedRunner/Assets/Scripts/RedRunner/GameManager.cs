@@ -152,7 +152,7 @@ namespace RedRunner
                 highestScore = true;
             }
             
-            SDKIntegrationManager.Instance.PlayerDied((int)Math.Round(m_Score/10), highestScore);
+          //  SDKIntegrationManager.Instance.PlayerDied((int)Math.Round(m_Score/10), highestScore);
 
             if (OnScoreChanged != null)
             {
