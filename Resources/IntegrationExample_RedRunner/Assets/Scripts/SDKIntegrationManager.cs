@@ -9,7 +9,6 @@ using NBitcoin;
 using Newtonsoft.Json;
 using RedRunner;
 using Stratis.Sidechains.Networks;
-//using Unity3dApi;
 using StratisNodeApi;
 using Stratis.SmartContracts;
 using UnityEngine;
@@ -31,6 +30,8 @@ public class SDKIntegrationManager : MonoBehaviour
     public Button PopupPanelOk_Button;
 
     public string ApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
+    //public string ApiUrl = "http://localhost:38223/";
+
 
     public bool InitWithRandomMnemonic = true;
 
@@ -88,8 +89,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private void InitMnemonic(string mnemonic)
     {
-       // Mnemonic m = new Mnemonic(mnemonic, Wordlist.English);
-        Mnemonic m= new Mnemonic("leopard fire legal door attract stove similar response photo prize seminar frown", Wordlist.English);
+        Mnemonic m = new Mnemonic(mnemonic, Wordlist.English);
         stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://cirrustestindexer.stratisnetwork.com/api/"), network, m);
 
         this.tokenRRT = new StandardTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
@@ -136,25 +136,25 @@ public class SDKIntegrationManager : MonoBehaviour
             this.NFTChestBalanceText.text = "Chest: " + NFTChestBalance;
         }, null);
     }
-    
-    //public void PlayerDied(int distance, bool isHighestScore)
-    //{
-    //    Debug.Log("PLAYER DEATH. coins collected = " + GameManager.Singleton.m_Coin.Value + "    distanceRan = " + distance);
 
-    //    Task.Run(async () =>
-    //    {
-    //        var coinsCollected = GameManager.Singleton.m_Coin.Value;
+    public void PlayerDied(int distance, bool isHighestScore)
+    {
+        Debug.Log("PLAYER DEATH. coins collected = " + GameManager.Singleton.m_Coin.Value + "    distanceRan = " + distance);
 
-    //        if (isHighestScore)
-    //            Debug.Log("New high distance" + distance);
+        Task.Run(async () =>
+        {
+            var coinsCollected = GameManager.Singleton.m_Coin.Value;
+
+            if (isHighestScore)
+                Debug.Log("New high distance" + distance);
 
 
-    //        PlayerNotificationResult result =
-    //            await client.PlayerAchievementsNotificationAsync(address, "NO_NAME", coinsCollected, distance);
+            PlayerNotificationResult result =
+                await client.PlayerAchievementsNotificationAsync(address, "NO_NAME", coinsCollected, distance);
 
-    //        Debug.Log("SEND TOKENS ON DEATH: " + result.SendTokens);
-    //    });
-    //}
+            Debug.Log("SEND TOKENS ON DEATH: " + result.SendTokens);
+        });
+    }
 
     #region UI
     private void InitializeUI()
@@ -170,8 +170,8 @@ public class SDKIntegrationManager : MonoBehaviour
         SendRRTButton.onClick.AddListener(() => this.StartCoroutine(SendRRT_ButtonCall()));
         Button_MintKiteNFT.onClick.AddListener(() => this.StartCoroutine(MintNFT_ButtonCall(true)));
         Button_MintChestNFT.onClick.AddListener(() => this.StartCoroutine(MintNFT_ButtonCall(false)));
-        //Button_SendKiteNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(true)));
-        //Button_SendChestNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(false)));
+        Button_SendKiteNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(true)));
+        Button_SendChestNFT.onClick.AddListener(() => this.StartCoroutine(SendNFT_ButtonCall(false)));
         SaveMnemonicButton.onClick.AddListener(() => SaveGame.Save(mnmemonicKey, this.Mnemonic_InputField.text));
 
         PopupPanelOk_Button.onClick.AddListener(() => this.PopupPanel.SetActive(false));
@@ -308,7 +308,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         if (straxBalance <= 0)
         {
-            this.DisplayPopup("You need to have some STRAX to mint NFT.");
+            this.DisplayPopup("You need to have some Cirrus coins to mint NFT.");
 
             yield break;
         }
@@ -344,99 +344,99 @@ public class SDKIntegrationManager : MonoBehaviour
         
     }
 
-    //private IEnumerator SendNFT_ButtonCall(bool isKite)
-    //{
-    //    ulong amount = ulong.Parse(this.AmountInputField.text);
-    //    string destAddress = this.DestAddrInputField.text;
+    private IEnumerator SendNFT_ButtonCall(bool isKite)
+    {
+        ulong amount = ulong.Parse(this.AmountInputField.text);
+        string destAddress = this.DestAddrInputField.text;
 
-    //    UInt256 balance = isKite ? NFTKiteBalance : NFTChestBalance;
+        UInt256 balance = isKite ? NFTKiteBalance : NFTChestBalance;
 
-    //    NFTWrapper wrapper = isKite ? nftKite : nftChest;
+        NFTWrapper wrapper = isKite ? nftKite : nftChest;
 
-    //    string contractAddr = isKite ? RedRunnerNFTContractAddress : RedRunnerNFTChestContractAddress;
+        string contractAddr = isKite ? RedRunnerNFTContractAddress : RedRunnerNFTChestContractAddress;
 
-    //    if (balance <= 0)
-    //    {
-    //        this.DisplayPopup("You dont have this NFT!");
-    //    }
-    //    else if (amount != 1)
-    //    {
-    //        this.DisplayPopup("Only 1 NFT can be sent at a time.");
-    //    }
-    //    else
-    //    {
-    //        string txHash = null;
-    //        string error = null;
+        if (balance <= 0)
+        {
+            this.DisplayPopup("You dont have this NFT!");
+        }
+        else if (amount != 1)
+        {
+            this.DisplayPopup("Only 1 NFT can be sent at a time.");
+        }
+        else
+        {
+            string txHash = null;
+            string error = null;
 
-    //        this.DisplayPopup("Sending NFT transaction. Wait...");
+            this.DisplayPopup("Sending NFT transaction. Wait...");
 
-    //        Task task = Task.Run(async () =>
-    //        {
-    //            try
-    //            {
-    //                List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(contractAddr, "TransferLog", null, NFTContractLogsStartHeight, null).ConfigureAwait(false)).ToList();
+            Task task = Task.Run(async () =>
+            {
+                try
+                {
+                    List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(contractAddr, "TransferLog", null, NFTContractLogsStartHeight, null).ConfigureAwait(false)).ToList();
 
-    //                List<TransferInfo> transferLogs = new List<TransferInfo>(receipts.Count);
+                    List<TransferInfo> transferLogs = new List<TransferInfo>(receipts.Count);
 
-    //                foreach (ReceiptResponse receiptRes in receipts)
-    //                {
-    //                    var log = receiptRes.Logs.First().Log.ToString();
-                        
-    //                    TransferInfo infoObj = JsonConvert.DeserializeObject<TransferInfo>(log);
-    //                    transferLogs.Add(infoObj);
-    //                }
+                    foreach (ReceiptResponse receiptRes in receipts)
+                    {
+                        var log = receiptRes.Logs.First().Log.ToString();
 
-    //                transferLogs.Reverse();
-                    
-    //                long selectedId = -1;
+                        TransferInfo infoObj = JsonConvert.DeserializeObject<TransferInfo>(log);
+                        transferLogs.Add(infoObj);
+                    }
 
-    //                for (int i = 0; i < transferLogs.Count; i++)
-    //                {
-    //                    if (transferLogs[i].To == address)
-    //                    {
-    //                        // Check if it was used already.
-    //                        long id = transferLogs[i].TokenId;
+                    transferLogs.Reverse();
 
-    //                        var logsAfter = transferLogs.GetRange(0, i);
+                    long selectedId = -1;
 
-    //                        bool usedAlready = logsAfter.Any(x => x.TokenId == id && x.From == address);
+                    for (int i = 0; i < transferLogs.Count; i++)
+                    {
+                        if (transferLogs[i].To == address)
+                        {
+                            // Check if it was used already.
+                            long id = transferLogs[i].TokenId;
 
-    //                        if (usedAlready)
-    //                            continue;
+                            var logsAfter = transferLogs.GetRange(0, i);
 
-    //                        selectedId = transferLogs[i].TokenId;
-    //                        break;
-    //                    }
-    //                }
+                            bool usedAlready = logsAfter.Any(x => x.TokenId == id && x.From == address);
 
-    //                if (selectedId == -1)
-    //                    throw new Exception("No NFT ID found");
-                    
-    //                Debug.Log(string.Format("Sending NFT from {0} to {1}, NFT ID: {2}", address, destAddress, selectedId));
+                            if (usedAlready)
+                                continue;
 
-    //                await wrapper.TransferFromAsync(address, destAddress, (ulong)selectedId);
+                            selectedId = transferLogs[i].TokenId;
+                            break;
+                        }
+                    }
 
-    //            }
-    //            catch (Exception e)
-    //            {
-    //                Debug.LogError(e.ToString());
-    //                error = e.ToString();
-    //                return;
-    //            }
-    //        });
+                    if (selectedId == -1)
+                        throw new Exception("No NFT ID found");
 
-    //        while (!task.IsCompleted)
-    //            yield return null;
+                    Debug.Log(string.Format("Sending NFT from {0} to {1}, NFT ID: {2}", address, destAddress, selectedId));
 
-    //        if (error != null)
-    //        {
-    //            this.DisplayPopup("Error sending NFT: " + error);
-    //        }
-    //        else
-    //        {
-    //            this.DisplayPopup(string.Format("NFT transaction {0} to {1} was sent.", txHash, destAddress));
-    //        }
-    //    }
-    //}
+                    await wrapper.TransferFromAsync(address, destAddress, (ulong)selectedId);
+
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                    error = e.ToString();
+                    return;
+                }
+            });
+
+            while (!task.IsCompleted)
+                yield return null;
+
+            if (error != null)
+            {
+                this.DisplayPopup("Error sending NFT: " + error);
+            }
+            else
+            {
+                this.DisplayPopup(string.Format("NFT transaction {0} to {1} was sent.", txHash, destAddress));
+            }
+        }
+    }
     #endregion
 }
