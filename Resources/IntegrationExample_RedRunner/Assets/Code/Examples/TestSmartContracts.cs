@@ -17,7 +17,7 @@ public class TestSmartContracts : MonoBehaviour
 
         // API Client used to interact with a node. Note that you should run node with '-txindex=1 -addressindex=1 -unityapi_enable=true' arguments.
         StratisNodeClient client = new StratisNodeClient("https://cirrustest-api-ha.stratisplatform.com/");
-        
+
         Mnemonic mnemonic = new Mnemonic("legal door leopard fire attract stove similar response photo prize seminar frown", Wordlist.English);
         StratisUnityManager stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://cirrustestindexer.stratisnetwork.com/api/"), network, mnemonic);
 
@@ -32,6 +32,10 @@ public class TestSmartContracts : MonoBehaviour
 
         //ReceiptResponse receipt = await client.ReceiptAsync("95b9c1e8ab28071b750ab61a3647954b0476d75173d91d0c8db0267c4894d1f6");
 
+
+        //Standard Token Contract Deploy       
+        //await DeployStandardTokenContractAsync(stratisUnityManager);
+
         //Deploying NFTContract
         string nftName = "gameSword";
         string nftSymbol = "GS";
@@ -39,14 +43,15 @@ public class TestSmartContracts : MonoBehaviour
         string txId = await NFTWrapper.DeployNFTContractAsync(stratisUnityManager, nftName, nftSymbol, false,
             stratisUnityManager.GetAddress().ToString(), 0);
         //ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable("txId").ConfigureAwait(false);
-        ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable("7fcf7d5ac6e4fb439b14af932bcfac850c982f98e8eff37bfa6bce8677413a39").ConfigureAwait(false);
+        ////ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable("098f49bef23f65ab2e67571c103cee107c2645755552c4ac2ac9c6018081167f").ConfigureAwait(false);
+        ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable("fd2ac73e32a7108614c17d863195f4ada59ee12b1f76040598b98caa2330e312").ConfigureAwait(false);
 
         Debug.Log("NFT deployed, it's address: " + receipt.NewContractAddress);
-
 
         bool isSuccess = receipt.Success;
         string contractAddr = receipt.NewContractAddress;
         Debug.Log("Checking contract deployment receipt. Success: " + isSuccess + " ContractAddress: " + contractAddr);
+
 
         //Debug.Log("Making local contract call.");
 
@@ -79,4 +84,19 @@ public class TestSmartContracts : MonoBehaviour
         string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.DaoContract.ByteCode, new string[] { constructorParameter }, 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
     }
+    private async Task DeployStandardTokenContractAsync(StratisUnityManager stratisUnityManager)
+    {
+        List<string> constructorParameter = new List<string>()
+        {
+            $"{(int)MethodParameterDataType.UInt256}#1000000",
+            $"{(int)MethodParameterDataType.String}#RedRunnerToken",
+            $"{(int)MethodParameterDataType.String}#RRT",
+            $"{(int)MethodParameterDataType.Byte}#8"
+        };
+
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
+        Debug.Log("Contract deployment tx sent. TxId: " + txId);
+
+    }
+
 }

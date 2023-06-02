@@ -12,9 +12,6 @@ using Network = NBitcoin.Network;
 /// </summary>
 public class SCInteractTest : MonoBehaviour
 {
-    //public string NodeApiUrl = "https://cirrus-api-ha.stratisplatform.com";
-
-    //public string BlockCoreApiUrl = "https://crs.indexer.thedude.pro/api/";
     public string NodeApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
 
     public string BlockCoreApiUrl = "https://cirrustestindexer.stratisnetwork.com/api/";
@@ -88,37 +85,26 @@ public class SCInteractTest : MonoBehaviour
     private async Task NFTWrapperTestAsync()
     {
         // If you want to deploy new instance of standard token contract use: NFTWrapper.DeployNFTContractAsync
-        // For this example we will be using already deployed contract.
-
-        // Contract deployment:
-        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", false);
-        //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId);
-        //Debug.Log(res.NewContractAddress);
-
+        // For this example we will be using already deployed contract.     
 
         //Deploying NFTContract
         Debug.Log("NFT Deployment Start.");
         string nftName = "gameSword";
         string nftSymbol = "GS";
 
-        //string txId = await NFTWrapper.DeployNFTContractAsync(stratisUnityManager, nftName, nftSymbol, false,
-        //    stratisUnityManager.GetAddress().ToString(), 0);
-        //Debug.Log("TransactionID: " + txId);
+        string txId = await NFTWrapper.DeployNFTContractAsync(stratisUnityManager, nftName, nftSymbol, false,
+            stratisUnityManager.GetAddress().ToString(), 0);
+        Debug.Log("TransactionID: " + txId);
         //ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
         ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable("e6c4f540df4b2f212a3fe02a59f581ae4787f3f11d86f056c7136c43987e2de1").ConfigureAwait(false);
-        
-        //ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable("7fcf7d5ac6e4fb439b14af932bcfac850c982f98e8eff37bfa6bce8677413a39").ConfigureAwait(false);
-
-        ////ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable("9e601d45fa03c93f3ebed837967f098c22b95b1d0316fba13b7b8d35a250812f").ConfigureAwait(false);
 
         Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);  //Address of DeployedNFTContract
-
 
         Debug.Log("Testing NFT.");
         //string nftAddr = "tHK8Qf7WrUaKqk9nF9JsQfPqwpVvJNKNKn";
 
         string nftAddr = "tRxYDrnKGAKcrSrc1VQMoKa28RSGUXywP5";
-        
+
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
 
         UInt256 balanceBefore = await nft.BalanceOfAsync(this.firstAddress);

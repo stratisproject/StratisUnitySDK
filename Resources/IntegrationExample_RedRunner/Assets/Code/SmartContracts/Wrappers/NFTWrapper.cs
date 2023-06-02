@@ -24,7 +24,8 @@ public class NFTWrapper
             $"{(int)MethodParameterDataType.UInt}#{royaltyPercentInt}"
         };
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0);
+        //string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContract.ByteCode, constructorParameter.ToArray(), 0);
+        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.NFTContractRoyalties.ByteCode, constructorParameter.ToArray(), 0);
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
 
         return txId;

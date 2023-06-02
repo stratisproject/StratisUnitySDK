@@ -30,18 +30,16 @@ public class SDKIntegrationManager : MonoBehaviour
     public Button PopupPanelOk_Button;
 
     public string ApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
-    //public string ApiUrl = "http://localhost:38223/";
-
 
     public bool InitWithRandomMnemonic = true;
 
     public string Mnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
-    public string RedRunnerTokenContractAddress = "t778saxw6Xdgs77Z5ePpaFPCZ9bk4oNrPT";
+    public string RedRunnerTokenContractAddress = "t8nS26bLRYcjAYWnnrTc5WFAyT1XMta114";
 
-    public string RedRunnerNFTContractAddress = "tPsCN2Wmu8ER1Bq1vufb6gVKrHQrUC5gu5";
+    public string RedRunnerNFTContractAddress = "tJ7SdXJGQrNdMDXWGpvRdzLkNDVLMzW9f2";
 
-    public string RedRunnerNFTChestContractAddress = "tHBDPyoLvu2MEYxy4novDyCd1maZhL5s3H";
+    public string RedRunnerNFTChestContractAddress = "tG8kFdF3HszvwQcKyJfU1hDLEJ6DJYYhza";
 
     public int CoinsToMintChest = 100;
 
@@ -77,13 +75,11 @@ public class SDKIntegrationManager : MonoBehaviour
 
         string initMnemonic = InitWithRandomMnemonic ? new Mnemonic(Wordlist.English, WordCount.Twelve).ToString() : Mnemonic;
 
-        
-
         if (SaveGame.Exists(mnmemonicKey))
             initMnemonic = SaveGame.Load<string>(mnmemonicKey);
         else
             SaveGame.Save(mnmemonicKey, initMnemonic);
-        
+
         InitMnemonic(initMnemonic);
     }
 
@@ -98,7 +94,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         address = stratisUnityManager.GetAddress().ToString();
         Debug.Log("Your address: " + address);
-        
+
         this.Mnemonic_InputField.text = mnemonic;
         this.AddressText.text = address;
 
@@ -116,7 +112,7 @@ public class SDKIntegrationManager : MonoBehaviour
                 this.NFTKiteBalance = await this.nftKite.BalanceOfAsync(this.address);
                 this.NFTChestBalance = await this.nftChest.BalanceOfAsync(this.address);
 
-                Debug.Log("STRAXBalance: " + straxBalance + " | TokenBalance: " + rrtBalance + " | NFTKiteBalance: " + NFTKiteBalance + " | NFTChestBalance: " + NFTChestBalance);
+                Debug.Log("CRSBalance: " + straxBalance + " | TokenBalance: " + rrtBalance + " | NFTKiteBalance: " + NFTKiteBalance + " | NFTChestBalance: " + NFTChestBalance);
             }
             catch (Exception e)
             {
@@ -211,7 +207,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         if (straxBalance < amount.ToUnit(MoneyUnit.BTC))
         {
-            this.DisplayPopup("Error sending tx: not enough STRAX");
+            this.DisplayPopup("Error sending tx: not enough Fund");
         }
         else
         {
@@ -241,7 +237,7 @@ public class SDKIntegrationManager : MonoBehaviour
             }
             else
             {
-                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} STRAX was sent.", txHash, destAddress, amount));
+                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} CIRRUS was sent.", txHash, destAddress, amount));
             }
 
             this.DestAddrInputField.text = "";
@@ -341,7 +337,7 @@ public class SDKIntegrationManager : MonoBehaviour
         {
             this.DisplayPopup(string.Format("Transaction {0} to mint NFT was sent.", txHash));
         }
-        
+
     }
 
     private IEnumerator SendNFT_ButtonCall(bool isKite)
