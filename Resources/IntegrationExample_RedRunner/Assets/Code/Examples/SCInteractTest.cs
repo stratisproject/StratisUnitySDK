@@ -1,8 +1,8 @@
-using System;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
-using Unity3dApi;
+using Stratis.SmartContracts;
+using StratisNodeApi;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Network = NBitcoin.Network;
@@ -12,7 +12,9 @@ using Network = NBitcoin.Network;
 /// </summary>
 public class SCInteractTest : MonoBehaviour
 {
-    public const string ApiUrl = "http://localhost:44336/";
+    public string NodeApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
+
+    public string BlockCoreApiUrl = "https://cirrustestindexer.stratisnetwork.com/api/";
 
     private readonly string firstAddrMnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
@@ -26,10 +28,10 @@ public class SCInteractTest : MonoBehaviour
 
     async void Start()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl);
+        StratisNodeClient client = new StratisNodeClient(NodeApiUrl);
 
         Mnemonic mnemonic = new Mnemonic(firstAddrMnemonic, Wordlist.English);
-        stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+        stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi(BlockCoreApiUrl), network, mnemonic);
         firstAddress = stratisUnityManager.GetAddress().ToString();
         Debug.Log("Your address: " + firstAddress);
 
@@ -38,20 +40,22 @@ public class SCInteractTest : MonoBehaviour
 
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
 
-        // StandardTokenWrapper test.
-        //await this.StandardTokenWrapperTestAsync().ConfigureAwait(false);
+        // StandartTokenWrapper test.
+        //await this.StandardTokenWrapperTestAsync();
 
         // NFT wrapper test.
-        await this.NFTWrapperTestAsync().ConfigureAwait(false);
+        await this.NFTWrapperTestAsync();
     }
 
     private async Task StandardTokenWrapperTestAsync()
     {
-        // If you want to deploy new instance of standard token contract use: StandardTokenWrapper.DeployStandardTokenAsync
+        // If you want to deploy new instance of standard token contract use: StandartTokenWrapper.DeployStandardTokenAsync
         // For this example we will be using already deployed contract.
         Debug.Log("Testing StandardTokenWrapper.");
 
-        string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+        //string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+        string standardTokenAddr = "tLDrGnZMg37RCp7iqad4FQseNZehb2sPLD";
+        
         StandardTokenWrapper stw = new StandardTokenWrapper(stratisUnityManager, standardTokenAddr);
 
         Debug.Log("Symbol: " + await stw.GetSymbolAsync());
@@ -61,18 +65,18 @@ public class SCInteractTest : MonoBehaviour
         Debug.Log("Decimals: " + await stw.GetDecimalsAsync());
         Debug.Log("Allowance: " + await stw.GetAllowanceAsync(firstAddress, secondAddress));
 
-        ulong firstAddrBalance = await stw.GetBalanceAsync(firstAddress);
-        ulong secondAddrBalance = await stw.GetBalanceAsync(secondAddress);
+        UInt256 firstAddrBalance = await stw.GetBalanceAsync(firstAddress);
+        UInt256 secondAddrBalance = await stw.GetBalanceAsync(secondAddress);
 
         // Transfer 1 to 2nd address.
         var txId = await stw.TransferToAsync(secondAddress, 1);
 
-        var receipt = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        var receipt = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
         Assert.IsTrue(bool.Parse(receipt.ReturnValue));
 
-        ulong firstAddrBalance2 = await stw.GetBalanceAsync(firstAddress);
-        ulong secondAddrBalance2 = await stw.GetBalanceAsync(secondAddress);
+        UInt256 firstAddrBalance2 = await stw.GetBalanceAsync(firstAddress);
+        UInt256 secondAddrBalance2 = await stw.GetBalanceAsync(secondAddress);
 
         Assert.IsTrue(firstAddrBalance - firstAddrBalance2 == 1);
         Assert.IsTrue(secondAddrBalance2 - secondAddrBalance == 1);
@@ -83,25 +87,36 @@ public class SCInteractTest : MonoBehaviour
     private async Task NFTWrapperTestAsync()
     {
         // If you want to deploy new instance of standard token contract use: NFTWrapper.DeployNFTContractAsync
-        // For this example we will be using already deployed contract.
+        // For this example we will be using already deployed contract.     
 
-        // Contract deployment:
-        //string deplId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, "TestNFT", "TNFT", "TestNFT_{0}", false).ConfigureAwait(false);
-        //ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(deplId).ConfigureAwait(false);
-        //Debug.Log(res.NewContractAddress);
+        //Deploying NFTContract
+        Debug.Log("NFT Deployment Start.");
+        string nftName = "gameSword";
+        string nftSymbol = "GS";
+
+        string txId = await NFTWrapper.DeployNFTContractAsync(stratisUnityManager, nftName, nftSymbol, false,
+            stratisUnityManager.GetAddress().ToString(), 0);
+        Debug.Log("TransactionID: " + txId);
+        //ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        ReceiptResponse res = await stratisUnityManager.WaitTillReceiptAvailable("e6c4f540df4b2f212a3fe02a59f581ae4787f3f11d86f056c7136c43987e2de1").ConfigureAwait(false);
+
+        Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);  //Address of DeployedNFTContract
 
         Debug.Log("Testing NFT.");
-        string nftAddr = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
+        //string nftAddr = "tHK8Qf7WrUaKqk9nF9JsQfPqwpVvJNKNKn";
+
+        string nftAddr = "tRxYDrnKGAKcrSrc1VQMoKa28RSGUXywP5";
+
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddr);
 
-        ulong balanceBefore = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceBefore = await nft.BalanceOfAsync(this.firstAddress);
         Debug.Log("NFT balance: " + balanceBefore);
 
-        string mintId = await nft.MintAsync(firstAddress).ConfigureAwait(false);
+        string mintId = await nft.MintAsync(firstAddress, "uri");
 
-        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId).ConfigureAwait(false);
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId);
 
-        ulong balanceAfter = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
+        UInt256 balanceAfter = await nft.BalanceOfAsync(this.firstAddress);
 
         Assert.IsTrue(balanceAfter == balanceBefore + 1);
 

@@ -9,7 +9,8 @@ using NBitcoin;
 using Newtonsoft.Json;
 using RedRunner;
 using Stratis.Sidechains.Networks;
-using Unity3dApi;
+using StratisNodeApi;
+using Stratis.SmartContracts;
 using UnityEngine;
 using UnityEngine.UI;
 using Network = NBitcoin.Network;
@@ -28,17 +29,17 @@ public class SDKIntegrationManager : MonoBehaviour
 
     public Button PopupPanelOk_Button;
 
-    public string ApiUrl = "http://localhost:44336/";
+    public string ApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
 
     public bool InitWithRandomMnemonic = true;
 
     public string Mnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
-    public string RedRunnerTokenContractAddress = "t778saxw6Xdgs77Z5ePpaFPCZ9bk4oNrPT";
+    public string RedRunnerTokenContractAddress = "t8nS26bLRYcjAYWnnrTc5WFAyT1XMta114";
 
-    public string RedRunnerNFTContractAddress = "tPsCN2Wmu8ER1Bq1vufb6gVKrHQrUC5gu5";
+    public string RedRunnerNFTContractAddress = "tJ7SdXJGQrNdMDXWGpvRdzLkNDVLMzW9f2";
 
-    public string RedRunnerNFTChestContractAddress = "tHBDPyoLvu2MEYxy4novDyCd1maZhL5s3H";
+    public string RedRunnerNFTChestContractAddress = "tG8kFdF3HszvwQcKyJfU1hDLEJ6DJYYhza";
 
     public int CoinsToMintChest = 100;
 
@@ -50,7 +51,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
     private string address;
 
-    private Unity3dClient client;
+    private StratisNodeClient client;
 
     private StandardTokenWrapper tokenRRT;
 
@@ -62,32 +63,30 @@ public class SDKIntegrationManager : MonoBehaviour
     private const string mnmemonicKey = "mnemSave";
 
     private decimal straxBalance = -1;
-    private ulong rrtBalance = 0;
-    private ulong NFTKiteBalance = 0;
-    private ulong NFTChestBalance = 0;
+    private UInt256 rrtBalance = 0;
+    private UInt256 NFTKiteBalance = 0;
+    private UInt256 NFTChestBalance = 0;
 
     async void Awake()
     {
         Instance = this;
-        client = new Unity3dClient(ApiUrl);
+        client = new StratisNodeClient(ApiUrl);
         this.InitializeUI();
 
         string initMnemonic = InitWithRandomMnemonic ? new Mnemonic(Wordlist.English, WordCount.Twelve).ToString() : Mnemonic;
-
-        
 
         if (SaveGame.Exists(mnmemonicKey))
             initMnemonic = SaveGame.Load<string>(mnmemonicKey);
         else
             SaveGame.Save(mnmemonicKey, initMnemonic);
-        
+
         InitMnemonic(initMnemonic);
     }
 
     private void InitMnemonic(string mnemonic)
     {
         Mnemonic m = new Mnemonic(mnemonic, Wordlist.English);
-        stratisUnityManager = new StratisUnityManager(client, network, m);
+        stratisUnityManager = new StratisUnityManager(client, new BlockCoreApi("https://cirrustestindexer.stratisnetwork.com/api/"), network, m);
 
         this.tokenRRT = new StandardTokenWrapper(stratisUnityManager, this.RedRunnerTokenContractAddress);
         this.nftKite = new NFTWrapper(stratisUnityManager, RedRunnerNFTContractAddress);
@@ -95,7 +94,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         address = stratisUnityManager.GetAddress().ToString();
         Debug.Log("Your address: " + address);
-        
+
         this.Mnemonic_InputField.text = mnemonic;
         this.AddressText.text = address;
 
@@ -113,7 +112,7 @@ public class SDKIntegrationManager : MonoBehaviour
                 this.NFTKiteBalance = await this.nftKite.BalanceOfAsync(this.address);
                 this.NFTChestBalance = await this.nftChest.BalanceOfAsync(this.address);
 
-                Debug.Log("STRAXBalance: " + straxBalance + " | TokenBalance: " + rrtBalance + " | NFTKiteBalance: " + NFTKiteBalance + " | NFTChestBalance: " + NFTChestBalance);
+                Debug.Log("CRSBalance: " + straxBalance + " | TokenBalance: " + rrtBalance + " | NFTKiteBalance: " + NFTKiteBalance + " | NFTChestBalance: " + NFTChestBalance);
             }
             catch (Exception e)
             {
@@ -133,7 +132,7 @@ public class SDKIntegrationManager : MonoBehaviour
             this.NFTChestBalanceText.text = "Chest: " + NFTChestBalance;
         }, null);
     }
-    
+
     public void PlayerDied(int distance, bool isHighestScore)
     {
         Debug.Log("PLAYER DEATH. coins collected = " + GameManager.Singleton.m_Coin.Value + "    distanceRan = " + distance);
@@ -208,7 +207,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         if (straxBalance < amount.ToUnit(MoneyUnit.BTC))
         {
-            this.DisplayPopup("Error sending tx: not enough STRAX");
+            this.DisplayPopup("Error sending tx: not enough Fund");
         }
         else
         {
@@ -238,7 +237,7 @@ public class SDKIntegrationManager : MonoBehaviour
             }
             else
             {
-                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} STRAX was sent.", txHash, destAddress, amount));
+                this.DisplayPopup(string.Format("Transaction {0} to {1} with amount: {2} CIRRUS was sent.", txHash, destAddress, amount));
             }
 
             this.DestAddrInputField.text = "";
@@ -294,6 +293,7 @@ public class SDKIntegrationManager : MonoBehaviour
     private IEnumerator MintNFT_ButtonCall(bool isKite)
     {
         NFTWrapper wrapper = isKite ? nftKite : nftChest;
+        string uri = "https://stratisplatorm.com/content/nftcollection/demonft.png";
 
         if (!isKite && GameManager.Singleton.m_Coin.Value < CoinsToMintChest)
         {
@@ -304,7 +304,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
         if (straxBalance <= 0)
         {
-            this.DisplayPopup("You need to have some STRAX to mint NFT.");
+            this.DisplayPopup("You need to have some Cirrus coins to mint NFT.");
 
             yield break;
         }
@@ -316,7 +316,7 @@ public class SDKIntegrationManager : MonoBehaviour
         {
             try
             {
-                string txId = await wrapper.MintAsync(this.address);
+                string txId = await wrapper.MintAsync(this.address, uri);
             }
             catch (Exception e)
             {
@@ -337,7 +337,7 @@ public class SDKIntegrationManager : MonoBehaviour
         {
             this.DisplayPopup(string.Format("Transaction {0} to mint NFT was sent.", txHash));
         }
-        
+
     }
 
     private IEnumerator SendNFT_ButtonCall(bool isKite)
@@ -345,7 +345,7 @@ public class SDKIntegrationManager : MonoBehaviour
         ulong amount = ulong.Parse(this.AmountInputField.text);
         string destAddress = this.DestAddrInputField.text;
 
-        ulong balance = isKite ? NFTKiteBalance : NFTChestBalance;
+        UInt256 balance = isKite ? NFTKiteBalance : NFTChestBalance;
 
         NFTWrapper wrapper = isKite ? nftKite : nftChest;
 
@@ -377,13 +377,13 @@ public class SDKIntegrationManager : MonoBehaviour
                     foreach (ReceiptResponse receiptRes in receipts)
                     {
                         var log = receiptRes.Logs.First().Log.ToString();
-                        
+
                         TransferInfo infoObj = JsonConvert.DeserializeObject<TransferInfo>(log);
                         transferLogs.Add(infoObj);
                     }
 
                     transferLogs.Reverse();
-                    
+
                     long selectedId = -1;
 
                     for (int i = 0; i < transferLogs.Count; i++)
@@ -407,7 +407,7 @@ public class SDKIntegrationManager : MonoBehaviour
 
                     if (selectedId == -1)
                         throw new Exception("No NFT ID found");
-                    
+
                     Debug.Log(string.Format("Sending NFT from {0} to {1}, NFT ID: {2}", address, destAddress, selectedId));
 
                     await wrapper.TransferFromAsync(address, destAddress, (ulong)selectedId);

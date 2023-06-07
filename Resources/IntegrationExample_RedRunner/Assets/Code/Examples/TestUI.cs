@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Bitcoin.Networks;
-using Unity3dApi;
+using StratisNodeApi;
 using UnityEngine;
 using UnityEngine.UI;
+using Stratis.Sidechains.Networks;
 
 public class TestUI : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class TestUI : MonoBehaviour
 
     void Start()
     {
-        this.ApiUrl_InputField.text = "http://localhost:44336/";
+        this.ApiUrl_InputField.text = "https://cirrustest-api-ha.stratisplatform.com/";
         this.Mnemonic_InputField.text = "leopard fire legal door attract stove similar response photo prize seminar frown";
 
         PopupPanel.SetActive(false);
@@ -45,7 +45,7 @@ public class TestUI : MonoBehaviour
     
     private IEnumerator TestApi_ButtonCall()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl_InputField.text);
+        StratisNodeClient client = new StratisNodeClient(ApiUrl_InputField.text);
 
         string resultString = "";
 
@@ -53,7 +53,8 @@ public class TestUI : MonoBehaviour
         {
             try
             {
-                await client.TipAsync().ConfigureAwait(false);
+                //await client.ReceiptAsync("e3270de09010dc9fb19b43fd5c04d667742b771b73743f5cae146a2841f7965e");
+                await client.ReceiptAsync("43aa3fa97e980e8d8c3dff59335943b3cb802dcfd018d0e8379bdbf82d2d198c");//Cirrus testnet
             }
             catch (Exception e)
             {
@@ -80,7 +81,7 @@ public class TestUI : MonoBehaviour
     {
         try
         {
-            this.stratisUnityManager = new StratisUnityManager(new Unity3dClient(ApiUrl_InputField.text), new StraxMain(), new Mnemonic(this.Mnemonic_InputField.text, Wordlist.English));
+            this.stratisUnityManager = new StratisUnityManager(new StratisNodeClient(ApiUrl_InputField.text), new BlockCoreApi("https://cirrustestindexer.stratisnetwork.com/api/"), new CirrusTest(), new Mnemonic(this.Mnemonic_InputField.text, Wordlist.English));
 
             this.DisplayPopup("StratisUnityManager initialized.");
 

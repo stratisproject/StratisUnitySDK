@@ -4,14 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
-using Unity3dApi;
+using Stratis.SmartContracts;
+using StratisNodeApi;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Network = NBitcoin.Network;
 
 public class NFTExample : MonoBehaviour
 {
-    public const string ApiUrl = "http://localhost:44336/";
+    public string NodeApiUrl = "https://cirrustest-api-ha.stratisplatform.com/";
+
+    public string BlockCoreApiUrl = "https://cirrustestindexer.stratisnetwork.com/api/";
 
     private readonly string firstAddrMnemonic = "legal door leopard fire attract stove similar response photo prize seminar frown";
 
@@ -23,53 +25,57 @@ public class NFTExample : MonoBehaviour
 
     private Network network = new CirrusTest();
 
+    private StratisNodeClient client;
+
     async void Start()
     {
-        Unity3dClient client = new Unity3dClient(ApiUrl);
+        client = new StratisNodeClient(NodeApiUrl);
 
         Mnemonic mnemonic = new Mnemonic(firstAddrMnemonic, Wordlist.English);
-        stratisUnityManager = new StratisUnityManager(client, network, mnemonic);
+        BlockCoreApi blockcoreAPI = new BlockCoreApi(BlockCoreApiUrl);
+        stratisUnityManager = new StratisUnityManager(client, blockcoreAPI, network, mnemonic);
         firstAddress = stratisUnityManager.GetAddress().ToString();
         secondAddress = new Mnemonic(secondAddrMnemonic).DeriveExtKey().PrivateKey.PubKey.GetAddress(network).ToString();
+        decimal balance = await stratisUnityManager.GetBalanceAsync();
 
-        Debug.Log("FirstAddr: " + firstAddress);
+        Debug.Log("FirstAddr: " + firstAddress + "    Balance: " + balance);
         Debug.Log("SecondAddr: " + secondAddress);
 
-        string nftAddress = "t8snCz4kQgovGTAGReAryt863NwEYqjJqy";
+        string nftAddress = "tG1vSp7Fd8S6UKH54sZ6sfi9frCXpxUrSz";
         NFTWrapper nft = new NFTWrapper(stratisUnityManager, nftAddress);
 
-        ulong balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress).ConfigureAwait(false);
-        ulong balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress).ConfigureAwait(false);
+         
+        List<long> ids = (await blockcoreAPI.GetOwnedNFTIds(firstAddress)).Select(x => x.id).ToList();
 
-        Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
+        string idsJoined = String.Join(",", ids);
+        Debug.Log("IDs: " + idsJoined);
         
-        // Now let's get token ID
-        List<ReceiptResponse> receipts = (await client.ReceiptSearchAsync(nftAddress, null, null, 2300000, null).ConfigureAwait(false)).ToList();
+        UInt256 balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress);
+        UInt256 balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress);
 
-        foreach (ReceiptResponse receiptRes in receipts)
-        {
-            var log = receiptRes.Logs.First().Log;
-            Debug.Log(log.ToString());
-        }
+        // Mint NFT
+        string mintId = await nft.MintAsync(firstAddress, "uri");
+        await this.stratisUnityManager.WaitTillReceiptAvailable(mintId);
+        Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
 
-        return;
+        string transferId = await nft.TransferFromAsync(firstAddress, secondAddress, 1);
+        ReceiptResponse transferReceipt = await this.stratisUnityManager.WaitTillReceiptAvailable(transferId);
+        Debug.Log("NFT transfer: Success: " + transferReceipt.Success + "   returned: " + transferReceipt.ReturnValue + "  transferID: " + transferId);
 
-        ulong tokenId = 12345;
-        string txId = await nft.TransferFromAsync("tD5aDZSu4Go4A23R7VsjuJTL51YMyeoLyS", "tP2r8anKBWczcBR89yv7rQ1rsSZA2BANhd", tokenId);
-
-        ReceiptResponse receipt = await stratisUnityManager.WaitTillReceiptAvailable(txId);
-
-        Debug.Log("Success: " + receipt.Success + "   returned: " + receipt.ReturnValue);
+        balanceFirstAddr = await nft.BalanceOfAsync(this.firstAddress);
+        balanceSecondAddr = await nft.BalanceOfAsync(this.secondAddress);
+        Debug.Log("NFT balance first addr: " + balanceFirstAddr + "    second addr: " + balanceSecondAddr);
     }
 
-    private async void DeployNFT()
+    private async Task DeployNFTAsync()
     {
         string nftName = "gameSword";
         string nftSymbol = "GS";
 
-        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, nftName + "_{0}", false);
+        string txId = await NFTWrapper.DeployNFTContractAsync(this.stratisUnityManager, nftName, nftSymbol, false,
+            this.stratisUnityManager.GetAddress().ToString(), 0);
 
-        ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId).ConfigureAwait(false);
+        ReceiptResponse res = await this.stratisUnityManager.WaitTillReceiptAvailable(txId);
 
         Debug.Log("NFT deployed, it's address: " + res.NewContractAddress);
     }
