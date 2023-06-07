@@ -53,7 +53,9 @@ public class SCInteractTest : MonoBehaviour
         // For this example we will be using already deployed contract.
         Debug.Log("Testing StandardTokenWrapper.");
 
-        string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+        //string standardTokenAddr = "tLG1Eap1f7H5tnRwhs58Jn7NVDrP3YTgrg";
+        string standardTokenAddr = "tLDrGnZMg37RCp7iqad4FQseNZehb2sPLD";
+        
         StandardTokenWrapper stw = new StandardTokenWrapper(stratisUnityManager, standardTokenAddr);
 
         Debug.Log("Symbol: " + await stw.GetSymbolAsync());

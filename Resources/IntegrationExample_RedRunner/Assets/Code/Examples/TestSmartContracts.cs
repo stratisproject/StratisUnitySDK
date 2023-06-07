@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NBitcoin;
 using Stratis.Sidechains.Networks;
+using Stratis.SmartContracts;
 using Stratis.SmartContracts.CLR.Serialization;
 using StratisNodeApi;
 using UnityEngine;
@@ -34,9 +35,9 @@ public class TestSmartContracts : MonoBehaviour
 
 
         //Standard Token Contract Deploy       
-        //await DeployStandardTokenContractAsync(stratisUnityManager);
+       // await DeployStandardTokenContractAsync(stratisUnityManager);
 
-        //Deploying NFTContract
+       // Deploying NFTContract
         string nftName = "gameSword";
         string nftSymbol = "GS";
 
@@ -85,17 +86,13 @@ public class TestSmartContracts : MonoBehaviour
         Debug.Log("Contract deployment tx sent. TxId: " + txId);
     }
     private async Task DeployStandardTokenContractAsync(StratisUnityManager stratisUnityManager)
-    {
-        List<string> constructorParameter = new List<string>()
-        {
-            $"{(int)MethodParameterDataType.UInt256}#1000000",
-            $"{(int)MethodParameterDataType.String}#RedRunnerToken",
-            $"{(int)MethodParameterDataType.String}#RRT",
-            $"{(int)MethodParameterDataType.Byte}#8"
-        };
+    {      
+        UInt256 totalSupply = 100000;
+        string token = "RedRunnrToken";
+        string tokenSymbol = "RRT";
+        byte decimals = 8;
 
-        string txId = await stratisUnityManager.SendCreateContractTransactionAsync(WhitelistedContracts.StandartTokenContract.ByteCode, constructorParameter.ToArray(), 0).ConfigureAwait(false);
-        Debug.Log("Contract deployment tx sent. TxId: " + txId);
+        string txId = await StandardTokenWrapper.DeployStandardTokenAsync(stratisUnityManager,totalSupply, token, tokenSymbol, decimals);
 
     }
 
